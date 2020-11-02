@@ -1,6 +1,7 @@
 import tkinter as tk
 from tkinter import font as tkfont
 from tkinter import ttk
+from tkinter import messagebox
 from tkcalendar import Calendar, DateEntry
 
 
@@ -14,37 +15,43 @@ class ExpenseManager(tk.Tk):
         self.title("Expense Manager")
         self.title_font = tkfont.Font(family="Arial", size=18, weight="bold", slant="italic")
 
-        # menubar on all frames
-        def hello():
-            print("Hello!")
+        # popup messages
+        def info():
+            messagebox.showwarning("Warning", "We are still working on this")
 
+        def leave():
+            answer = messagebox.askyesno("Exit system", "Are you sure you want to quit?")
+            if answer:
+                self.quit()
+
+        # menubar on all frames
         menubar = tk.Menu(self)
         self.config(menu=menubar)
 
         file_menu = tk.Menu(menubar, tearoff=0, font=("Arial", 11))
-        file_menu.add_command(label="New entry", command=hello)
-        file_menu.add_command(label="Chart", command=hello)
+        file_menu.add_command(label="New entry", command=info)
+        file_menu.add_command(label="Chart", command=info)
         file_menu.add_separator()
-        file_menu.add_command(label="Exit", command=self.quit)
+        file_menu.add_command(label="Exit", command=leave)
         menubar.add_cascade(label="File", menu=file_menu)
 
         category_menu = tk.Menu(menubar, tearoff=0, font=("Arial", 11))
-        category_menu.add_command(label="Add category", command=hello)
-        category_menu.add_command(label="Remove category", command=hello)
+        category_menu.add_command(label="Add category", command=info)
+        category_menu.add_command(label="Remove category", command=info)
         menubar.add_cascade(label="Categories", menu=category_menu)
 
         tools_menu = tk.Menu(menubar, tearoff=0, font=("Arial", 11))
-        tools_menu.add_radiobutton(label="Light mode", value=1)
-        tools_menu.add_radiobutton(label="Dark mode", value=2)
+        tools_menu.add_radiobutton(label="Light mode", value=1, command=info)
+        tools_menu.add_radiobutton(label="Dark mode", value=2, command=info)
         tools_menu.add_separator()
-        tools_menu.add_command(label="Settings", command=hello)
+        tools_menu.add_command(label="Settings", command=info)
         menubar.add_cascade(label="Tools", menu=tools_menu)
 
         help_menu = tk.Menu(menubar, tearoff=0, font=("Arial", 11))
-        help_menu.add_command(label="Help", command=hello)
-        help_menu.add_command(label="Check for updates", command=hello)
+        help_menu.add_command(label="Help", command=info)
+        help_menu.add_command(label="Check for updates", command=info)
         help_menu.add_separator()
-        help_menu.add_command(label="About", command=hello)
+        help_menu.add_command(label="About", command=info)
         menubar.add_cascade(label="Help", menu=help_menu)
 
         # the container is where we stack frames on top of each other. Wanted page will raise above the others.
@@ -54,7 +61,7 @@ class ExpenseManager(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (EntryPage, StartPage, PageIncome, PageExpenses):
+        for F in (StartPage, PageIncome, PageExpenses):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -94,7 +101,7 @@ class StartPage(tk.Frame):
         button_window2 = tk.Frame(self, bg="#2A2A2A")
         button_window2.place(relx=0.9, rely=0.9, relwidth=0.2, relheight=0.1, anchor="n")
         entry_button = tk.Button(button_window2, font=("arial", 13), text="Add an entry", bg="#1F1F1F",
-                                 fg="#DED4D4", command=lambda: controller.show_frame("EntryPage"))
+                                 fg="#DED4D4", command=EntryPopup)
         entry_button.pack(side="left", fill="both", expand=True)
 
 
@@ -138,28 +145,9 @@ class PageExpenses(tk.Frame):
         expense_button.pack(side="left", fill="both", expand=True)
 
 
-class EntryPage(tk.Frame):
+# class EntryPopup(tk.Frame):
 
-    def __init__(self, parent, controller):
-        tk.Frame.__init__(self, parent, bg="#2A2A2A")
-        self.controller = controller
-        label = tk.Label(self, text="Expense insertion page", font=controller.title_font,
-                         bg="#2A2A2A", fg="#DED4D4")
-        label.pack(side="top", fill="x", pady=10)
-
-        def calendar():
-            top = tk.Toplevel(self)
-
-            ttk.Label(top, text='Choose date').pack(padx=10, pady=10)
-
-            cal = DateEntry(top, width=12, background='#2A2A2A',
-                            foreground='#DED4D4', borderwidth=2)
-            cal.pack(padx=10, pady=10)
-
-        s = ttk.Style(self)
-        s.theme_use('clam')
-
-        ttk.Button(self, text='DateEntry', command=calendar).pack(padx=10, pady=10)
+    # def __init__(self, parent):
 
 
 if __name__ == "__main__":
