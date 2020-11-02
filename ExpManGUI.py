@@ -101,7 +101,7 @@ class StartPage(tk.Frame):
         button_window2 = tk.Frame(self, bg="#2A2A2A")
         button_window2.place(relx=0.9, rely=0.9, relwidth=0.2, relheight=0.1, anchor="n")
         entry_button = tk.Button(button_window2, font=("arial", 13), text="Add an entry", bg="#1F1F1F",
-                                 fg="#DED4D4", command=EntryPopup)
+                                 fg="#DED4D4")
         entry_button.pack(side="left", fill="both", expand=True)
 
 
