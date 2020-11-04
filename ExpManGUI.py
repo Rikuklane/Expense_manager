@@ -1,13 +1,14 @@
 import tkinter as tk
-from tkinter import*
+from tkinter import *
 from tkinter import font as tkfont
 from tkinter import ttk
 from tkinter import messagebox
+from tkinter.scrolledtext import *
 from tkcalendar import Calendar, DateEntry
 import mysql.connector
+from mysql.connector import errorcode
 from datetime import date
-from tkinter import messagebox
-from tkinter.scrolledtext import*
+
 
 try:
     mydb = mysql.connector.connect(
@@ -17,8 +18,14 @@ try:
     )
     EMcursor = mydb.cursor()
     EMcursor.execute("CREATE DATABASE ExpManDatabase")
-except:
-    print("Database already exists.")
+
+except mysql.connector.Error as err:
+    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+        print("Something is wrong with your user name or password")
+    elif err.errno == errorcode.ER_DB_CREATE_EXISTS:
+        print("Database already exists")
+    else:
+        print(err)
 
 try:
     mydbtbl = mysql.connector.connect(
@@ -26,12 +33,20 @@ try:
         user="root",
         password="password",
         database="ExpManDatabase"
-    )
+        )
     EMcursor = mydbtbl.cursor()
     EMcursor.execute("CREATE TABLE expenses (year VARCHAR(255),month VARCHAR(255), day VARCHAR (255), aa VARCHAR(255))")
     EMcursor.execute("CREATE TABLE incomes (year VARCHAR(200),month VARCHAR(200), day VARCHAR (200), aa VARCHAR(200))")
-except:
-    print("Table  already exists.")
+
+except mysql.connector.Error as err:
+    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+        print("Something is wrong with your user name or password")
+    elif err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+        print("Table already exists")
+    else:
+        print(err)
+
+
 class ExpenseManager(tk.Tk):
 
     def __init__(self, *args, **kwargs):
@@ -117,26 +132,27 @@ class StartPage(tk.Frame):
         # button window
         button_window1 = tk.Frame(self, bg="#2A2A2A")
         button_window1.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
-        #taking info from database
-        sumlist=[]
+        # taking info from database
+        sumlist = []
         for m in ("expenses", "incomes"):
-            sql_select = "select * from %s"%m
+            sql_select = "select * from %s" % m
             EMcursor.execute(sql_select)
             records = EMcursor.fetchall()
-            a=0
+            a = 0
             for row in records:
-                today=str(date.today()).split("-")
-                if today[0]==row[0]:
-                    if today[1]==row[1]:
-                        a+=float(row[3])
-            sumlist=sumlist+[a]
-        sumlist=sumlist+[(sumlist[0]-sumlist[1])]
-        #buttons
-        income_button = tk.Button(button_window1, font=("arial", 13), text="Incomes\n"+str(sumlist[0]), bg="#1F1F1F", fg="#DED4D4",
-                                  command=lambda: controller.show_frame("PageIncome"))
+                today = str(date.today()).split("-")
+                if today[0] == row[0]:
+                    if today[1] == row[1]:
+                        a += float(row[3])
+            sumlist = sumlist+[a]
+        sumlist = sumlist+[(sumlist[0]-sumlist[1])]
+        # buttons
+        income_button = tk.Button(button_window1, font=("arial", 13), text="Incomes\n"+str(sumlist[0]), bg="#1F1F1F",
+                                  fg="#DED4D4", command=lambda: controller.show_frame("PageIncome"))
         expense_button = tk.Button(button_window1, font=("arial", 13), text="Expenses\n"+str(sumlist[1]), bg="#1F1F1F",
                                    fg="#DED4D4", command=lambda: controller.show_frame("PageExpenses"))
-        balance_button = tk.Button(button_window1, font=("arial", 13), text="Balance\n"+str(sumlist[2]), bg="#1F1F1F", fg="#DED4D4")
+        balance_button = tk.Button(button_window1, font=("arial", 13), text="Balance\n"+str(sumlist[2]), bg="#1F1F1F",
+                                   fg="#DED4D4")
         income_button.pack(side="left", fill="both", expand=True)
         expense_button.pack(side="left", fill="both", expand=True)
         balance_button.pack(side="left", fill="both", expand=True)
@@ -146,6 +162,7 @@ class StartPage(tk.Frame):
         entry_button = tk.Button(button_window2, font=("arial", 13), text="Add an entry", bg="#1F1F1F",
                                  fg="#DED4D4")
         entry_button.pack(side="left", fill="both", expand=True)
+
 
 class PageIncome(tk.Frame):
 
@@ -166,7 +183,7 @@ class PageIncome(tk.Frame):
         first_page_button.pack(side="left", fill="both", expand=1)
         expense_button.pack(side="left", fill="both", expand=1)
 
-        textbox=ScrolledText(self, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height= 23)
+        textbox = ScrolledText(self, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
         sql_select = "select * from incomes"
         EMcursor.execute(sql_select)
         records = EMcursor.fetchall()
@@ -177,6 +194,8 @@ class PageIncome(tk.Frame):
             textbox.yview(END)
             i += 1
         textbox.pack(anchor="sw", side="bottom", padx=38, pady=20)
+
+
 class PageExpenses(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -208,6 +227,7 @@ class PageExpenses(tk.Frame):
             i += 1
         textbox.pack(anchor="sw", side="bottom", padx=38, pady=20)
 
+
 class EntryPage(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -221,15 +241,20 @@ class EntryPage(tk.Frame):
         s.theme_use('clam')
 
         var = tk.StringVar()
-        r1 = tk.Radiobutton(self, text="Expenses", variable= var, value="1", indicator=0, background="#2A2A2A", foreground="#DED4D4", font=("Arial", 12))
+        r1 = tk.Radiobutton(self, text="Expenses", variable=var, value="1", indicator=0, bg="#2A2A2A",
+                            fg="#DED4D4", font=("Arial", 12))
+        r2 = tk.Radiobutton(self, text="Incomes", variable=var, value="2", indicator=0, bg="#2A2A2A",
+                            fg="#DED4D4", font=("Arial", 12))
+        l1 = ttk.Label(self, text='Choose date', bg='#2A2A2A', fg='#DED4D4', font=('Arial', 13))
+        cal = DateEntry(self, width=12, bg='#2A2A2A', fg='#DED4D4', borderwidth=2)
+        l2 = ttk.Label(self, text='Ma ei tea nh, siia summa', bg='#2A2A2A', fg='#DED4D4', font=('Arial', 13))
+        smma = ttk.Entry(self, width=20, bg='#DAD4D4', fg='#2A2A2A')
+
         r1.pack(fill="x", ipady=5)
-        r2 = tk.Radiobutton(self, text="Incomes", variable= var, value="2", indicator=0, background="#2A2A2A", foreground="#DED4D4", font=("Arial", 12))
         r2.pack(fill="x", ipady=5)
-        ttk.Label(self, text='Choose date', background='#2A2A2A', foreground='#DED4D4', font=('Arial', 13)).pack(padx=10, pady=10)
-        cal = DateEntry(self, width=12, background='#2A2A2A', foreground='#DED4D4', borderwidth=2)
         cal.pack(padx=10, pady=10, anchor="center")
-        ttk.Label(self, text='Ma ei tea nh, siia summa', background='#2A2A2A', foreground='#DED4D4', font=('Arial', 13)).pack(padx=10, pady=10)
-        smma = ttk.Entry(self, width=20, background='#DAD4D4', foreground='#2A2A2A')
+        l1.pack(padx=10, pady=10)
+        l2.pack(padx=10, pady=10)
         smma.pack(padx=10, pady=5)
 
         def intodb():
@@ -237,10 +262,12 @@ class EntryPage(tk.Frame):
             caldate = str(cal.get_date()).split("-")
             sma = str(smma.get())
             if var2 == "1":
-                expenses_sql = "INSERT INTO expenses (year, month, day, aa) VALUES (%s, %s, %s, %s)" % (caldate[0], caldate[1], caldate[2], sma)
+                expenses_sql = "INSERT INTO expenses (year, month, day, aa) VALUES (%s, %s, %s, %s)" % (
+                                caldate[0], caldate[1], caldate[2], sma)
                 EMcursor.execute(expenses_sql)
             elif var2 == "2":
-                incomes_sql = "INSERT INTO incomes (year, month, day, aa) VALUES (%s, %s, %s, %s)" % (caldate[0], caldate[1], caldate[2], sma)
+                incomes_sql = "INSERT INTO incomes (year, month, day, aa) VALUES (%s, %s, %s, %s)" % (
+                                caldate[0], caldate[1], caldate[2], sma)
                 EMcursor.execute(incomes_sql)
             mydbtbl.commit()
             controller.show_frame("StartPage")
