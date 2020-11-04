@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import*
 from tkinter import font as tkfont
 from tkinter import ttk
+from tkinter import messagebox
 from tkcalendar import Calendar, DateEntry
 import mysql.connector
 from datetime import date
@@ -12,7 +13,7 @@ try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="xIru4114B8GG9 ."
+        password="password"
     )
     EMcursor = mydb.cursor()
     EMcursor.execute("CREATE DATABASE ExpManDatabase")
@@ -23,7 +24,7 @@ try:
     mydbtbl = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="xIru4114B8GG9 .",
+        password="password",
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
@@ -50,6 +51,7 @@ class ExpenseManager(tk.Tk):
             if answer:
                 self.quit()
 
+        # menubar on all frames
         menubar = tk.Menu(self)
         self.config(menu=menubar)
 
@@ -86,7 +88,7 @@ class ExpenseManager(tk.Tk):
         container.grid_columnconfigure(0, weight=1)
 
         self.frames = {}
-        for F in (EntryPage, StartPage, PageIncome, PageExpenses):
+        for F in (StartPage, PageIncome, PageExpenses):
             page_name = F.__name__
             frame = F(parent=container, controller=self)
             self.frames[page_name] = frame
@@ -142,7 +144,7 @@ class StartPage(tk.Frame):
         button_window2 = tk.Frame(self, bg="#2A2A2A")
         button_window2.place(relx=0.9, rely=0.9, relwidth=0.2, relheight=0.1, anchor="n")
         entry_button = tk.Button(button_window2, font=("arial", 13), text="Add an entry", bg="#1F1F1F",
-                                 fg="#DED4D4", command=lambda: controller.show_frame("EntryPage"))
+                                 fg="#DED4D4")
         entry_button.pack(side="left", fill="both", expand=True)
 
 class PageIncome(tk.Frame):
