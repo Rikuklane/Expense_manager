@@ -8,6 +8,9 @@ from tkcalendar import Calendar, DateEntry
 import mysql.connector
 from mysql.connector import errorcode
 from datetime import date
+import matplotlib.figure
+import matplotlib.patches
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 try:
     mydb = mysql.connector.connect(
@@ -171,9 +174,12 @@ class PageIncome(tk.Frame):
                          bg="#2A2A2A", fg="#DED4D4")
         label.pack(side="top", fill="x", pady=10)
 
-        # button window
+        # Different windows
         button_window = tk.Frame(self, bg="#2A2A2A")
+        diagram_window = tk.Frame(self, bg="#2A2A2A")
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
+        diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
+        # Buttons
         first_page_button = tk.Button(button_window, font=("arial", 13), text="<-Back to head page", bg="#1F1F1F",
                                       fg="#DED4D4", command=lambda: controller.show_frame("StartPage"))
         expense_button = tk.Button(button_window, font=("arial", 13), text="Expenses page->", bg="#1F1F1F",
@@ -181,6 +187,7 @@ class PageIncome(tk.Frame):
         first_page_button.pack(side="left", fill="both", expand=1)
         expense_button.pack(side="left", fill="both", expand=1)
 
+        # SQL
         textbox = ScrolledText(self, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
         sql_select = "select * from incomes"
         EMcursor.execute(sql_select)
@@ -193,6 +200,18 @@ class PageIncome(tk.Frame):
             i += 1
         textbox.pack(anchor="sw", side="bottom", padx=38, pady=20)
 
+        # Diagram
+        fig = matplotlib.figure.Figure(figsize=(4, 4))
+        shape = fig.add_subplot(111)
+        shape.pie([12, 35, 20, 5, 28])
+        shape.legend(["12", "35", "20", "5", "28"])
+        circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
+        shape.add_artist(circle)
+        canvas = FigureCanvasTkAgg(fig, diagram_window)
+        fig.patch.set_facecolor("#2A2A2A")
+        canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
+        canvas.draw()
+
 
 class PageExpenses(tk.Frame):
 
@@ -203,9 +222,12 @@ class PageExpenses(tk.Frame):
                          bg="#2A2A2A", fg="#DED4D4")
         label.pack(side="top", fill="x", pady=10)
 
-        # button window
+        # Different frames
         button_window = tk.Frame(self, bg="#2A2A2A")
+        diagram_window = tk.Frame(self, bg="#2A2A2A")
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
+        diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
+        # buttons
         first_page_button = tk.Button(button_window, font=("arial", 13), text="<- Back to head page", bg="#1F1F1F",
                                       fg="#DED4D4", command=lambda: controller.show_frame("StartPage"))
         expense_button = tk.Button(button_window, font=("arial", 13), text="Income page ->", bg="#1F1F1F", fg="#DED4D4",
@@ -213,6 +235,7 @@ class PageExpenses(tk.Frame):
         first_page_button.pack(side="left", fill="both", expand=True)
         expense_button.pack(side="left", fill="both", expand=True)
 
+        # SQL
         textbox = ScrolledText(self, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
         sql_select = "select * from expenses"
         EMcursor.execute(sql_select)
@@ -224,6 +247,18 @@ class PageExpenses(tk.Frame):
             textbox.yview(END)
             i += 1
         textbox.pack(anchor="sw", side="bottom", padx=38, pady=20)
+
+        # Diagram
+        fig = matplotlib.figure.Figure(figsize=(4, 4))
+        shape = fig.add_subplot(111)
+        shape.pie([3, 6, 9, 15, 20, 25, 70])
+        shape.legend(["3", "6", "9", "15", "20", "25", "70"])
+        circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
+        shape.add_artist(circle)
+        canvas = FigureCanvasTkAgg(fig, diagram_window)
+        fig.patch.set_facecolor("#2A2A2A")
+        canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
+        canvas.draw()
 
 
 class EntryPage(tk.Frame):
