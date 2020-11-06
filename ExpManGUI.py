@@ -284,12 +284,14 @@ class EntryPage(tk.Frame):
 
         # different kinds of windows
         button_window = tk.Frame(self, bg="#2A2A2A")
+        cancel_window = tk.Frame(self, bg="#2A2A2A")
         category_window = tk.Frame(self, bg="#2A2A2A")
         description_window = tk.Frame(self, bg="#2A2A2A")
         calendar_window = tk.Frame(self, bg="#2A2A2A")
         money_window = tk.Frame(self, bg="#2A2A2A")
         add_window = tk.Frame(self, bg="#2A2A2A")
         button_window.place(relx=0.5, rely=0.1, relwidth=0.7, relheight=0.1, anchor="n")
+        cancel_window.place(relx=0.01, rely=0.1, relwidth=0.1, relheight=0.1, anchor="nw")
         category_window.place(relx=0.5, rely=0.25, relwidth=0.4, relheight=0.1, anchor="n")
         description_window.place(relx=0.5, rely=0.4, relwidth=0.7, relheight=0.1, anchor="n")
         calendar_window.place(relx=0.5, rely=0.55, relwidth=0.7, relheight=0.1, anchor="n")
@@ -301,6 +303,8 @@ class EntryPage(tk.Frame):
                                 fg="#DED4D4", font=("Arial", 13))
         radio2 = tk.Radiobutton(button_window, text="Incomes", variable=var, value="2", indicator=0, bg="#1F1F1F",
                                 fg="#DED4D4", font=("Arial", 13))
+        cancel_button = tk.Button(cancel_window, text='<--', command=lambda: controller.show_frame("StartPage"),
+                                  bg="#1F1F1F", fg="#DED4D4")
         cat_button = tk.Button(category_window, text="Category", bg="#1F1F1F", fg="#DED4D4", font=("Arial", 13))
         desc_label = tk.Label(description_window, text='             Enter Memo              ', bg='#2A2A2A',
                               fg='#DED4D4', font=('Arial', 13))
@@ -312,6 +316,7 @@ class EntryPage(tk.Frame):
         smma = tk.Entry(money_window, width=20, bg='#FFFFFF', fg='#2A2A2A', font=('Arial', 14))
         radio1.pack(side="left", fill="both", expand=True)
         radio2.pack(side="right", fill="both", expand=True)
+        cancel_button.pack(side="left", fill="both", expand=True)
         cat_button.pack(side="left", fill="both", expand=True)
         desc_label.pack(side="left", fill="both", expand=True)
         description.pack(side="left", fill="both", expand=True)
@@ -333,8 +338,8 @@ class EntryPage(tk.Frame):
             mydbtbl.commit()
             controller.show_frame("StartPage")
 
-        button1 = tk.Button(add_window, text='Add', command=intodb, bg="#1F1F1F", fg="#DED4D4")
-        button1.pack(side="top", fill="both", expand=True)
+        add_button = tk.Button(add_window, text='Add', command=intodb, bg="#1F1F1F", fg="#DED4D4")
+        add_button.pack(side="top", fill="both", expand=True)
 
 
 if __name__ == "__main__":
