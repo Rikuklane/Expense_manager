@@ -176,8 +176,10 @@ class PageIncome(tk.Frame):
 
         # Different windows
         button_window = tk.Frame(self, bg="#2A2A2A")
+        sql_window = tk.Frame(self, bg="#2A2A2A")
         diagram_window = tk.Frame(self, bg="#2A2A2A")
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
+        sql_window.place(relx=0.08, rely=0.25, relwidth=0.4, relheight=0.7, anchor="nw")
         diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
         # Buttons
         first_page_button = tk.Button(button_window, font=("arial", 13), text="<-Back to head page", bg="#1F1F1F",
@@ -188,7 +190,7 @@ class PageIncome(tk.Frame):
         expense_button.pack(side="left", fill="both", expand=1)
 
         # SQL
-        textbox = ScrolledText(self, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
+        textbox = ScrolledText(sql_window, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
         sql_select = "select * from incomes"
         EMcursor.execute(sql_select)
         records = EMcursor.fetchall()
@@ -198,13 +200,16 @@ class PageIncome(tk.Frame):
             textbox.insert(END, text1)
             textbox.yview(END)
             i += 1
-        textbox.pack(anchor="sw", side="bottom", padx=38, pady=20)
+        textbox.pack(side="left", fill="both", expand=True)
 
         # Diagram
+        sizes = [12, 35, 20, 5, 28]
+        labels = ["Investments", "Salary", "Awards", "Sale", "Rental"]
         fig = matplotlib.figure.Figure(figsize=(4, 4))
         shape = fig.add_subplot(111)
-        shape.pie([12, 35, 20, 5, 28])
-        shape.legend(["12", "35", "20", "5", "28"])
+        shape.pie(sizes, autopct="%1.1f%%")
+        shape.legend(labels, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
+                     ncol=2, mode="expand", borderaxespad=0.)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
         shape.add_artist(circle)
         canvas = FigureCanvasTkAgg(fig, diagram_window)
@@ -224,8 +229,10 @@ class PageExpenses(tk.Frame):
 
         # Different frames
         button_window = tk.Frame(self, bg="#2A2A2A")
+        sql_window = tk.Frame(self, bg="#2A2A2A")
         diagram_window = tk.Frame(self, bg="#2A2A2A")
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
+        sql_window.place(relx=0.08, rely=0.25, relwidth=0.4, relheight=0.7, anchor="nw")
         diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
         # buttons
         first_page_button = tk.Button(button_window, font=("arial", 13), text="<- Back to head page", bg="#1F1F1F",
@@ -236,7 +243,7 @@ class PageExpenses(tk.Frame):
         expense_button.pack(side="left", fill="both", expand=True)
 
         # SQL
-        textbox = ScrolledText(self, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
+        textbox = ScrolledText(sql_window, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
         sql_select = "select * from expenses"
         EMcursor.execute(sql_select)
         records = EMcursor.fetchall()
@@ -246,13 +253,16 @@ class PageExpenses(tk.Frame):
             textbox.insert(END, text1)
             textbox.yview(END)
             i += 1
-        textbox.pack(anchor="sw", side="bottom", padx=38, pady=20)
+        textbox.pack(side="left", fill="both", expand=True)
 
         # Diagram
+        sizes = [3, 6, 9, 15, 20, 25, 70]
+        labels = ["Insurance", "Health", "Education", "Work", "Home", "Bills", "Food"]
         fig = matplotlib.figure.Figure(figsize=(4, 4))
         shape = fig.add_subplot(111)
-        shape.pie([3, 6, 9, 15, 20, 25, 70])
-        shape.legend(["3", "6", "9", "15", "20", "25", "70"])
+        shape.pie(sizes, autopct="%1.1f%%")
+        shape.legend(labels, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
+                     ncol=2, mode="expand", borderaxespad=0.)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
         shape.add_artist(circle)
         canvas = FigureCanvasTkAgg(fig, diagram_window)
