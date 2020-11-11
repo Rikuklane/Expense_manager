@@ -16,7 +16,7 @@ try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="password"
+        password="xIru4114B8GG9 ."
     )
     EMcursor = mydb.cursor()
     EMcursor.execute("CREATE DATABASE ExpManDatabase")
@@ -32,12 +32,28 @@ try:
     mydbtbl = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="password",
+        password="xIru4114B8GG9 .",
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
-    EMcursor.execute("CREATE TABLE expenses (year VARCHAR(255),month VARCHAR(255), day VARCHAR (255), aa VARCHAR(255))")
-    EMcursor.execute("CREATE TABLE incomes (year VARCHAR(200),month VARCHAR(200), day VARCHAR (200), aa VARCHAR(200))")
+    EMcursor.execute("CREATE TABLE expenses (year VARCHAR(255),month VARCHAR(255), day VARCHAR (255), aa VARCHAR(255), catg VARCHAR(255))")
+except mysql.connector.Error as err:
+    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+        print("Something is wrong with your user name or password")
+    elif err.errno == errorcode.ER_DB_CREATE_EXISTS:
+        print("Database already exists")
+    else:
+        print(err)
+
+try:
+    mydbtbl = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="xIru4114B8GG9 .",
+        database="ExpManDatabase"
+    )
+    EMcursor = mydbtbl.cursor()
+    EMcursor.execute("CREATE TABLE incomes (year VARCHAR(200),month VARCHAR(200), day VARCHAR (200), aa VARCHAR(200), catg VARCHAR(200))")
 except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
         print("Something is wrong with your user name or password")
@@ -128,13 +144,12 @@ class StartPage(tk.Frame):
         label = tk.Label(self, text=d2[0], font=controller.title_font,
                          bg="#2A2A2A", fg="#DED4D4")
         label.pack(side="top", fill="x", pady=10)
-
         # button window
         button_window1 = tk.Frame(self, bg="#2A2A2A")
         button_window1.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
         # taking info from database
         sumlist = []
-        for m in ("expenses", "incomes"):
+        for m in ("incomes", "expenses"):
             sql_select = "select * from %s" % m
             EMcursor.execute(sql_select)
             records = EMcursor.fetchall()
@@ -193,8 +208,10 @@ class PageIncome(tk.Frame):
         EMcursor.execute(sql_select)
         records = EMcursor.fetchall()
         i = 1
+        categ = ["Food", "Bills", "Shopping", "Clothing", "Travel", "Health", "Other"]
         for row in records:
-            text1 = str(i) + ") " + row[2] + "." + row[1] + "." + row[0] + " - " + row[3] + "€" + "\n"
+            text1 = str(i) + ") " + row[2] + "." + row[1] + "." + row[0] + " - " + row[3] + "€ category: " +\
+                    categ[int(row[4])] + "\n"
             textbox.insert(END, text1)
             textbox.yview(END)
             i += 1
@@ -203,8 +220,13 @@ class PageIncome(tk.Frame):
         # Diagram
         fig = matplotlib.figure.Figure(figsize=(4, 4))
         shape = fig.add_subplot(111)
-        shape.pie([12, 35, 20, 5, 28])
-        shape.legend(["12", "35", "20", "5", "28"])
+        categories = []
+        for i in range(1, 7):
+            for row in records:
+                if row[4] == str(i):
+                    categories = categories + [row[3]]
+        shape.pie(categories)
+        shape.legend(categ)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
         shape.add_artist(circle)
         canvas = FigureCanvasTkAgg(fig, diagram_window)
@@ -241,8 +263,10 @@ class PageExpenses(tk.Frame):
         EMcursor.execute(sql_select)
         records = EMcursor.fetchall()
         i = 1
+        categ = ["Food", "Bills", "Shopping", "Clothing", "Travel", "Health", "Other"]
         for row in records:
-            text1 = str(i) + ") " + row[2] + "." + row[1] + "." + row[0] + " - " + row[3] + "€" + "\n"
+            text1 = str(i) + ") " + row[2] + "." + row[1] + "." + row[0] + " - " + row[3] + "€ category: " +\
+                    categ[int(row[4])] + "\n"
             textbox.insert(END, text1)
             textbox.yview(END)
             i += 1
@@ -251,8 +275,13 @@ class PageExpenses(tk.Frame):
         # Diagram
         fig = matplotlib.figure.Figure(figsize=(4, 4))
         shape = fig.add_subplot(111)
-        shape.pie([3, 6, 9, 15, 20, 25, 70])
-        shape.legend(["3", "6", "9", "15", "20", "25", "70"])
+        categories = []
+        for i in range(1, 7):
+            for row in records:
+                if row[4] == str(i):
+                    categories = categories + [row[3]]
+        shape.pie(categories)
+        shape.legend(categ)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
         shape.add_artist(circle)
         canvas = FigureCanvasTkAgg(fig, diagram_window)
@@ -271,15 +300,18 @@ class EntryPage(tk.Frame):
         label1.pack(side="top", fill="x", pady=10)
 
         var = tk.StringVar()
+        var_cat = tk.StringVar()
 
         # different kinds of windows
         button_window = tk.Frame(self, bg="#2A2A2A")
+        cancel_window = tk.Frame(self, bg="#2A2A2A")
         category_window = tk.Frame(self, bg="#2A2A2A")
         description_window = tk.Frame(self, bg="#2A2A2A")
         calendar_window = tk.Frame(self, bg="#2A2A2A")
         money_window = tk.Frame(self, bg="#2A2A2A")
         add_window = tk.Frame(self, bg="#2A2A2A")
         button_window.place(relx=0.5, rely=0.1, relwidth=0.7, relheight=0.1, anchor="n")
+        cancel_window.place(relx=0.01, rely=0.1, relwidth=0.1, relheight=0.1, anchor="nw")
         category_window.place(relx=0.5, rely=0.25, relwidth=0.4, relheight=0.1, anchor="n")
         description_window.place(relx=0.5, rely=0.4, relwidth=0.7, relheight=0.1, anchor="n")
         calendar_window.place(relx=0.5, rely=0.55, relwidth=0.7, relheight=0.1, anchor="n")
@@ -291,7 +323,18 @@ class EntryPage(tk.Frame):
                                 fg="#DED4D4", font=("Arial", 13))
         radio2 = tk.Radiobutton(button_window, text="Incomes", variable=var, value="2", indicator=0, bg="#1F1F1F",
                                 fg="#DED4D4", font=("Arial", 13))
-        cat_button = tk.Button(category_window, text="Category", bg="#1F1F1F", fg="#DED4D4", font=("Arial", 13))
+        cancel_button = tk.Button(cancel_window, text='<--', command=lambda: controller.show_frame("StartPage"),
+                                  bg="#1F1F1F", fg="#DED4D4")
+        cat_button = tk.Menubutton(category_window, text="Categories", bg="#1F1F1F", indicator=0,
+                                   fg="#DED4D4", font=("Arial", 13), relief="raised")
+        cat_button.menu = Menu(cat_button, tearoff=0, bg="#1F1F1F", fg="#DED4D4")
+        cat_button["menu"] = cat_button.menu
+        categories = ["Food", "Bills", "Shopping", "Clothing", "Travel", "Health", "Other"]
+        i = 1
+        for category in categories:
+            cat_button.menu.add_radiobutton(label=category, variable=var_cat, value=i, background='#2A2A2A',
+                                            foreground='#FFFFFF', font=('Arial', 12), )
+            i += 1
         desc_label = tk.Label(description_window, text='             Enter Memo              ', bg='#2A2A2A',
                               fg='#DED4D4', font=('Arial', 13))
         description = tk.Entry(description_window, width=20, bg='#FFFFFF', fg='#2A2A2A', font=('Arial', 14))
@@ -302,6 +345,7 @@ class EntryPage(tk.Frame):
         smma = tk.Entry(money_window, width=20, bg='#FFFFFF', fg='#2A2A2A', font=('Arial', 14))
         radio1.pack(side="left", fill="both", expand=True)
         radio2.pack(side="right", fill="both", expand=True)
+        cancel_button.pack(side="left", fill="both", expand=True)
         cat_button.pack(side="left", fill="both", expand=True)
         desc_label.pack(side="left", fill="both", expand=True)
         description.pack(side="left", fill="both", expand=True)
@@ -314,17 +358,21 @@ class EntryPage(tk.Frame):
             var2 = var.get()
             caldate = str(cal.get_date()).split("-")
             sma = str(smma.get())
+            category2 = var_cat.get()
             if var2 == "1":
-                expenses_sql = "INSERT INTO expenses (year, month, day, aa) VALUES (%s, %s, %s, %s)" % (caldate[0], caldate[1], caldate[2], sma)
+                expenses_sql = "INSERT INTO expenses VALUES (%s, %s, %s, %s, %s)" % (caldate[0], caldate[1],
+                                                                                     caldate[2], sma, category2)
                 EMcursor.execute(expenses_sql)
             elif var2 == "2":
-                incomes_sql = "INSERT INTO incomes (year, month, day, aa) VALUES (%s, %s, %s, %s)" % (caldate[0], caldate[1], caldate[2], sma)
+                incomes_sql = "INSERT INTO incomes VALUES (%s, %s, %s, %s, %s)" % (caldate[0], caldate[1],
+                                                                                   caldate[2], sma, category2)
                 EMcursor.execute(incomes_sql)
             mydbtbl.commit()
+            mydbtbl.close()
             controller.show_frame("StartPage")
 
-        button1 = tk.Button(add_window, text='Add', command=intodb, bg="#1F1F1F", fg="#DED4D4")
-        button1.pack(side="top", fill="both", expand=True)
+        add_button = tk.Button(add_window, text='Add', command=intodb, bg="#1F1F1F", fg="#DED4D4")
+        add_button.pack(side="top", fill="both", expand=True)
 
 
 if __name__ == "__main__":
