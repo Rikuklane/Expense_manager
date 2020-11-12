@@ -191,8 +191,10 @@ class PageIncome(tk.Frame):
 
         # Different windows
         button_window = tk.Frame(self, bg="#2A2A2A")
+        sql_window = tk.Frame(self, bg="#2A2A2A")
         diagram_window = tk.Frame(self, bg="#2A2A2A")
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
+        sql_window.place(relx=0.08, rely=0.25, relwidth=0.4, relheight=0.7, anchor="nw")
         diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
         # Buttons
         first_page_button = tk.Button(button_window, font=("arial", 13), text="<-Back to head page", bg="#1F1F1F",
@@ -203,7 +205,7 @@ class PageIncome(tk.Frame):
         expense_button.pack(side="left", fill="both", expand=1)
 
         # SQL
-        textbox = ScrolledText(self, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
+        textbox = ScrolledText(sql_window, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
         sql_select = "select * from incomes"
         EMcursor.execute(sql_select)
         records = EMcursor.fetchall()
@@ -215,7 +217,7 @@ class PageIncome(tk.Frame):
             textbox.insert(END, text1)
             textbox.yview(END)
             i += 1
-        textbox.pack(anchor="sw", side="bottom", padx=38, pady=20)
+        textbox.pack(side="left", fill="both", expand=True)
 
         # Diagram
         fig = matplotlib.figure.Figure(figsize=(4, 4))
@@ -225,8 +227,9 @@ class PageIncome(tk.Frame):
             for row in records:
                 if row[4] == str(i):
                     categories = categories + [row[3]]
-        shape.pie(categories)
-        shape.legend(categ)
+        shape.pie(categories, autopct="%1.1f%%")
+        shape.legend(categ,  bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
+                     ncol=2, mode="expand", borderaxespad=0.)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
         shape.add_artist(circle)
         canvas = FigureCanvasTkAgg(fig, diagram_window)
@@ -246,8 +249,10 @@ class PageExpenses(tk.Frame):
 
         # Different frames
         button_window = tk.Frame(self, bg="#2A2A2A")
+        sql_window = tk.Frame(self, bg="#2A2A2A")
         diagram_window = tk.Frame(self, bg="#2A2A2A")
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
+        sql_window.place(relx=0.08, rely=0.25, relwidth=0.4, relheight=0.7, anchor="nw")
         diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
         # buttons
         first_page_button = tk.Button(button_window, font=("arial", 13), text="<- Back to head page", bg="#1F1F1F",
@@ -258,19 +263,19 @@ class PageExpenses(tk.Frame):
         expense_button.pack(side="left", fill="both", expand=True)
 
         # SQL
-        textbox = ScrolledText(self, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
+        textbox = ScrolledText(sql_window, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
         sql_select = "select * from expenses"
         EMcursor.execute(sql_select)
         records = EMcursor.fetchall()
         i = 1
         categ = ["Food", "Bills", "Shopping", "Clothing", "Travel", "Health", "Other"]
         for row in records:
-            text1 = str(i) + ") " + row[2] + "." + row[1] + "." + row[0] + " - " + row[3] + "€ category: " +\
+            text1 = str(i) + ") " + row[2] + "." + row[1] + "." + row[0] + " - " + row[3] + "€ category: " + \
                     categ[int(row[4])] + "\n"
             textbox.insert(END, text1)
             textbox.yview(END)
             i += 1
-        textbox.pack(anchor="sw", side="bottom", padx=38, pady=20)
+        textbox.pack(side="left", fill="both", expand=True)
 
         # Diagram
         fig = matplotlib.figure.Figure(figsize=(4, 4))
@@ -280,8 +285,9 @@ class PageExpenses(tk.Frame):
             for row in records:
                 if row[4] == str(i):
                     categories = categories + [row[3]]
-        shape.pie(categories)
-        shape.legend(categ)
+        shape.pie(categories, autopct="%1.1f%%")
+        shape.legend(categ,  bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
+                     ncol=2, mode="expand", borderaxespad=0.)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
         shape.add_artist(circle)
         canvas = FigureCanvasTkAgg(fig, diagram_window)
