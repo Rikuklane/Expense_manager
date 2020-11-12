@@ -81,6 +81,9 @@ class ExpenseManager(tk.Tk):
             answer = messagebox.askyesno("Exit system", "Are you sure you want to quit?")
             if answer:
                 self.quit()
+        
+        # override the exit button
+        self.protocol("WM_DELETE_WINDOW", leave)
 
         # menubar on all frames
         menubar = tk.Menu(self)
@@ -227,7 +230,7 @@ class PageIncome(tk.Frame):
             for row in records:
                 if row[4] == str(i):
                     categories = categories + [row[3]]
-        shape.pie(categories, autopct="%1.1f%%")
+        shape.pie(categories, autopct="%1.1f%%", normalize=True)
         shape.legend(categ,  bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
                      ncol=2, mode="expand", borderaxespad=0.)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
@@ -285,7 +288,7 @@ class PageExpenses(tk.Frame):
             for row in records:
                 if row[4] == str(i):
                     categories = categories + [row[3]]
-        shape.pie(categories, autopct="%1.1f%%")
+        shape.pie(categories, autopct="%1.1f%%", normalize=True)
         shape.legend(categ,  bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
                      ncol=2, mode="expand", borderaxespad=0.)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
