@@ -339,11 +339,11 @@ class EntryPage(tk.Frame):
         cat_button.menu = Menu(cat_button, tearoff=0, bg="#1F1F1F", fg="#DED4D4")
         cat_button["menu"] = cat_button.menu
         categories = ["Food", "Bills", "Shopping", "Clothing", "Travel", "Health", "Other"]
-        i = 1
+        muutuja = 0
         for category in categories:
-            cat_button.menu.add_radiobutton(label=category, variable=var_cat, value=i, background='#2A2A2A',
+            cat_button.menu.add_radiobutton(label=category, variable=var_cat, value=muutuja, background='#2A2A2A',
                                             foreground='#FFFFFF', font=('Arial', 12), )
-            i += 1
+            muutuja += 1
         desc_label = tk.Label(description_window, text='             Enter Memo              ', bg='#2A2A2A',
                               fg='#DED4D4', font=('Arial', 13))
         description = tk.Entry(description_window, width=20, bg='#FFFFFF', fg='#2A2A2A', font=('Arial', 14))
@@ -377,7 +377,6 @@ class EntryPage(tk.Frame):
                                                                                    caldate[2], sma, category2)
                 EMcursor.execute(incomes_sql)
             mydbtbl.commit()
-            mydbtbl.close()
             controller.show_frame("StartPage")
 
         add_button = tk.Button(add_window, text='Add', command=intodb, bg="#1F1F1F", fg="#DED4D4")
