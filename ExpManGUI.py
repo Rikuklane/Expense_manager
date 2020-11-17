@@ -12,6 +12,7 @@ import matplotlib.figure
 import matplotlib.patches
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
+# Database creation
 try:
     mydb = mysql.connector.connect(
         host="localhost",
@@ -28,6 +29,7 @@ except mysql.connector.Error as err:
     else:
         print(err)
 
+# Categories table creation
 try:
     mydbtbl = mysql.connector.connect(
         host="localhost",
@@ -36,7 +38,15 @@ try:
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
-    EMcursor.execute("CREATE TABLE expenses (year VARCHAR(255),month VARCHAR(255), day VARCHAR (255), aa VARCHAR(255), catg VARCHAR(255))")
+    EMcursor.execute("CREATE TABLE categories (type enum('I', 'E') NOT NULL, name VARCHAR(50) NOT NULL)")
+    # adding preset categories
+    sql = "INSERT INTO categories (type, name) VALUES (%s, %s)"
+    val = [("E", "Food"), ("E", "Travel"), ("E", "Bills"), ("E", "Health"), ("E", "Gifts"), ("E", "Sport"),
+           ("E", "Clothing"), ("E", "Entertainment"), ("E", "Education"), ("E", "Electronics"), ("E", "Other"),
+           ("I", "Salary"), ("I", "Awards"), ("I", "Rental"), ("I", "Investments"), ("I", "Sale"), ("I", "Grants"),
+           ("I", "Dividends"), ("I", "Other")]
+    EMcursor.executemany(sql, val)
+    mydbtbl.commit()
 except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
         print("Something is wrong with your user name or password")
@@ -45,6 +55,7 @@ except mysql.connector.Error as err:
     else:
         print(err)
 
+# Expenses table creation
 try:
     mydbtbl = mysql.connector.connect(
         host="localhost",
@@ -53,7 +64,27 @@ try:
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
-    EMcursor.execute("CREATE TABLE incomes (year VARCHAR(200),month VARCHAR(200), day VARCHAR (200), aa VARCHAR(200), catg VARCHAR(200))")
+    EMcursor.execute("CREATE TABLE expenses (year VARCHAR(50) NOT NULL,month VARCHAR(50) NOT NULL,"
+                     "day VARCHAR (50) NOT NULL, aa VARCHAR(50) NOT NULL, catg VARCHAR(50) NOT NULL)")
+except mysql.connector.Error as err:
+    if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+        print("Something is wrong with your user name or password")
+    elif err.errno == errorcode.ER_DB_CREATE_EXISTS:
+        print("Database already exists")
+    else:
+        print(err)
+
+# Incomes table creation
+try:
+    mydbtbl = mysql.connector.connect(
+        host="localhost",
+        user="root",
+        password="password",
+        database="ExpManDatabase"
+    )
+    EMcursor = mydbtbl.cursor()
+    EMcursor.execute("CREATE TABLE incomes (year VARCHAR(50) NOT NULL,month VARCHAR(50) NOT NULL,"
+                     " day VARCHAR (50) NOT NULL, aa VARCHAR(50) NOT NULL, catg VARCHAR(50) NOT NULL)")
 except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
         print("Something is wrong with your user name or password")
@@ -230,7 +261,11 @@ class PageIncome(tk.Frame):
             for row in records:
                 if row[4] == str(i):
                     categories = categories + [row[3]]
-        shape.pie(categories, autopct="%1.1f%%", normalize=True)
+        # making the pie explode
+        explode = []
+        for el in categories:
+            explode.append(0.05)
+        shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
         shape.legend(categ,  bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
                      ncol=2, mode="expand", borderaxespad=0.)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
@@ -288,7 +323,11 @@ class PageExpenses(tk.Frame):
             for row in records:
                 if row[4] == str(i):
                     categories = categories + [row[3]]
-        shape.pie(categories, autopct="%1.1f%%", normalize=True)
+        # explosion of pie chart
+        explode = []
+        for el in categories:
+            explode.append(0.05)
+        shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
         shape.legend(categ,  bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
                      ncol=2, mode="expand", borderaxespad=0.)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
