@@ -89,6 +89,23 @@ class ExpenseManager(tk.Tk):
         self.title("Expense Manager")
         self.title_font = tkfont.Font(family="Arial", size=18, weight="bold", slant="italic")
 
+        # the container is where we stack frames on top of each other. Wanted page will raise above the others.
+        container = tk.Frame(self, bg="#2A2A2A")
+        container.place(relwidth=1, relheight=1)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        self.frames = {}
+        for F in (EntryPage, StartPage, PageIncome, PageExpenses):
+            page_name = F.__name__
+            frame = F(parent=container, controller=self)
+            self.frames[page_name] = frame
+
+            # put all of the pages in the same location on top of each other. Top one is visible.
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame("StartPage")
+
         def Add_category():
             window = Toplevel(self, bg="#2A2A2A")
             window.geometry("300x200")
@@ -105,7 +122,7 @@ class ExpenseManager(tk.Tk):
                                     fg="#DED4D4", font=("Arial", 13))
             radio2 = tk.Radiobutton(radio_window, text="Incomes", variable=var, value="2", indicator=0, bg="#1F1F1F",
                                     fg="#DED4D4", font=("Arial", 13))
-            label = Label(add_window, text = "Category name:", bg = "#2A2A2A", fg = "#FFFFFF", font=('Arial', 13))
+            label = Label(add_window, text="Category name:", bg="#2A2A2A", fg="#FFFFFF", font=('Arial', 13))
             category_entry = tk.Entry(add_window, width=20, bg='#FFFFFF', fg='#2A2A2A', font=('Arial', 13))
 
             def add():
@@ -118,14 +135,15 @@ class ExpenseManager(tk.Tk):
                 mydbtbl.commit()
                 window.destroy()
 
-            add_button = tk.Button(button_window, command=add ,text="Add category", width=10, bg='#2A2A2A', fg='#FFFFFF', font=('Arial', 13))
+            add_button = tk.Button(button_window, command=add, text="Add category", width=10, bg='#2A2A2A',
+                                   fg='#FFFFFF', font=('Arial', 13))
             radio1.pack(side="left", fill="both", expand=True)
             radio2.pack(side="right", fill="both", expand=True)
             label.pack(padx=10, pady=10, side="top", anchor="w")
             category_entry.pack(side="top", anchor="w")
             add_button.pack(side='top', anchor='center')
 
-        # popup messages
+        # popup messages on menu bar
         def info():
             messagebox.showwarning("Warning", "We are still working on this")
 
@@ -135,10 +153,26 @@ class ExpenseManager(tk.Tk):
                                          "This project is created as a school assignment.\n\n"
                                          "Created by Triin Schaffrik and Richard Kuklane.")
 
+        def update():
+            messagebox.showinfo("Checking for updates..", "No new updates found.\n\n"
+                                                          "Your program is running the latest version.\n\n"
+                                                          "If you do not trust this message, check the page below:\n"
+                                                          "https://github.com/Rikuklane/Expense_manager")
+
+        def help():
+            messagebox.showinfo("Help is on the way", "If you need help, there are two options:\n\n"
+                                                      "   1. Contact Richard Kuklane or Triin Schaffrik\n\n"
+                                                      "   2. Visit https://github.com/Rikuklane/Expense_manager")
+
         def leave():
             answer = messagebox.askyesno("Exit system", "Are you sure you want to quit?")
             if answer:
                 self.quit()
+
+        def entry():
+            answer = messagebox.askyesno("Go to entry page", "Do you wish to make an entry?")
+            if answer:
+                self.show_frame("EntryPage")
 
         # override the exit button
         self.protocol("WM_DELETE_WINDOW", leave)
@@ -148,7 +182,7 @@ class ExpenseManager(tk.Tk):
         self.config(menu=menubar)
 
         file_menu = tk.Menu(menubar, tearoff=0, font=("Arial", 11))
-        file_menu.add_command(label="New entry", command=info)
+        file_menu.add_command(label="New entry", command=entry)
         file_menu.add_command(label="Chart", command=info)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=leave)
@@ -167,28 +201,11 @@ class ExpenseManager(tk.Tk):
         menubar.add_cascade(label="Tools", menu=tools_menu)
 
         help_menu = tk.Menu(menubar, tearoff=0, font=("Arial", 11))
-        help_menu.add_command(label="Help", command=info)
-        help_menu.add_command(label="Check for updates", command=info)
+        help_menu.add_command(label="Help", command=help)
+        help_menu.add_command(label="Check for updates", command=update)
         help_menu.add_separator()
         help_menu.add_command(label="About", command=about)
         menubar.add_cascade(label="Help", menu=help_menu)
-
-        # the container is where we stack frames on top of each other. Wanted page will raise above the others.
-        container = tk.Frame(self, bg="#2A2A2A")
-        container.place(relwidth=1, relheight=1)
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
-
-        self.frames = {}
-        for F in (EntryPage, StartPage, PageIncome, PageExpenses):
-            page_name = F.__name__
-            frame = F(parent=container, controller=self)
-            self.frames[page_name] = frame
-
-            # put all of the pages in the same location on top of each other. Top one is visible.
-            frame.grid(row=0, column=0, sticky="nsew")
-
-        self.show_frame("StartPage")
 
     def show_frame(self, page_name):
         # Show a frame for the given page name
