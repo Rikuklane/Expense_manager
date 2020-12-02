@@ -36,13 +36,36 @@ try:
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
-    EMcursor.execute("CREATE TABLE expenses (year VARCHAR(5) NOT NULL,month VARCHAR(2) NOT NULL, day VARCHAR (2) NOT NULL,"
-                     "aa VARCHAR(255) NOT NULL,catg VARCHAR(255) NOT NULL, descr VARCHAR(200))")
-    EMcursor.execute("CREATE TABLE incomes (year VARCHAR(5) NOT NULL,month VARCHAR(2) NOT NULL, day VARCHAR (2) NOT NULL,"
-                     "aa VARCHAR(255) NOT NULL,catg VARCHAR(255) NOT NULL, descr VARCHAR(200))")
-    EMcursor.execute("CREATE TABLE categories (expense_categ VARCHAR(50), income_categ VARCHAR(50))")
-    EMcursor.execute("INSERT INTO categories VALUES ('Other', 'Other'), ('Salary', 'Food'), ('Family', 'Bill'),"
-                     "('Work', 'Shopping'), ('Scholarchip', 'Transportation')")
+    try:
+        EMcursor.execute("CREATE TABLE expenses (year VARCHAR(5),month VARCHAR(2), day VARCHAR (2), aa VARCHAR(255), catg VARCHAR(255), descr VARCHAR(200))")
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with your username or password")
+        elif err.errno == errorcode.ER_DB_CREATE_EXISTS:
+            print("Database already exists")
+        else:
+            print(err)
+
+    try:
+        EMcursor.execute("CREATE TABLE incomes (year VARCHAR(5),month VARCHAR(2), day VARCHAR (2), aa VARCHAR(255), catg VARCHAR(255), descr VARCHAR(200))")
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with your username or password")
+        elif err.errno == errorcode.ER_DB_CREATE_EXISTS:
+            print("Database already exists")
+        else:
+            print(err)
+
+    try:
+        EMcursor.execute("CREATE TABLE categories (expense_categ VARCHAR(50), income_categ VARCHAR(50))")
+        EMcursor.execute("INSERT INTO categories VALUES ('Other', 'Other'), ('Salary', 'Food'), ('Family', 'Bill'), ('Work', 'Shopping'), ('Scholarchip', 'Transportation')")
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with your username or password")
+        elif err.errno == errorcode.ER_DB_CREATE_EXISTS:
+            print("Database already exists")
+        else:
+            print(err)
 except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
         print("Something is wrong with your username or password")
@@ -52,6 +75,7 @@ except mysql.connector.Error as err:
         print(err)
 
 
+# The start of the app
 class ExpenseManager(tk.Tk):
 
     def __init__(self, *args, **kwargs):
@@ -61,6 +85,23 @@ class ExpenseManager(tk.Tk):
         self.geometry("800x500")
         self.title("Expense Manager")
         self.title_font = tkfont.Font(family="Arial", size=18, weight="bold", slant="italic")
+
+        # the container is where we stack frames on top of each other. Wanted page will raise above the others.
+        container = tk.Frame(self, bg="#2A2A2A")
+        container.place(relwidth=1, relheight=1)
+        container.grid_rowconfigure(0, weight=1)
+        container.grid_columnconfigure(0, weight=1)
+
+        self.frames = {}
+        for F in (EntryPage, StartPage, PageIncome, PageExpenses):
+            page_name = F.__name__
+            frame = F(parent=container, controller=self)
+            self.frames[page_name] = frame
+
+            # put all of the pages in the same location on top of each other. Top one is visible.
+            frame.grid(row=0, column=0, sticky="nsew")
+
+        self.show_frame("StartPage")
 
         def Add_category():
             window = Toplevel(self, bg="#2A2A2A")
@@ -84,9 +125,9 @@ class ExpenseManager(tk.Tk):
             def add():
                 category = category_entry.get()
                 var2 = var.get()
-                if var2 == "1":
+                if var2 == "2":
                     EMcursor.execute(f"INSERT INTO categories (expense_categ) VALUES ('{category}')")
-                elif var2 == "2":
+                elif var2 == "1":
                     EMcursor.execute(f"INSERT INTO categories (income_categ) VALUES ('{category}')")
                 mydbtbl.commit()
                 window.destroy()
@@ -99,14 +140,37 @@ class ExpenseManager(tk.Tk):
             category_entry.pack(side="top", anchor="w")
             add_button.pack(side='top', anchor='center')
 
-        # popup messages
+        # popup messages on menu bar
+
         def info():
             messagebox.showwarning("Warning", "We are still working on this")
+
+        def about():
+            messagebox.showinfo("About", "This is an expense manager python application.\n\n"
+                                         "This project runs on SQL database.\n\n"
+                                         "This project is created as a school assignment.\n\n"
+                                         "Created by Triin Schaffrik and Richard Kuklane.")
+
+        def update():
+            messagebox.showinfo("Checking for updates..", "No new updates found.\n\n"
+                                                          "Your program is running the latest version.\n\n"
+                                                          "If you do not trust this message, check the page below:\n"
+                                                          "https://github.com/Rikuklane/Expense_manager")
+
+        def help():
+            messagebox.showinfo("Help is on the way", "If you need help, there are two options:\n\n"
+                                                      "   1. Contact Richard Kuklane or Triin Schaffrik\n\n"
+                                                      "   2. Visit https://github.com/Rikuklane/Expense_manager")
 
         def leave():
             answer = messagebox.askyesno("Exit system", "Are you sure you want to quit?")
             if answer:
                 self.quit()
+
+        def entry():
+            answer = messagebox.askyesno("Go to entry page", "Do you wish to make an entry?")
+            if answer:
+                self.show_frame("EntryPage")
 
         # override the exit button
         self.protocol("WM_DELETE_WINDOW", leave)
@@ -116,7 +180,7 @@ class ExpenseManager(tk.Tk):
         self.config(menu=menubar)
 
         file_menu = tk.Menu(menubar, tearoff=0, font=("Arial", 11))
-        file_menu.add_command(label="New entry", command=info)
+        file_menu.add_command(label="New entry", command=entry)
         file_menu.add_command(label="Chart", command=info)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=leave)
@@ -135,28 +199,11 @@ class ExpenseManager(tk.Tk):
         menubar.add_cascade(label="Tools", menu=tools_menu)
 
         help_menu = tk.Menu(menubar, tearoff=0, font=("Arial", 11))
-        help_menu.add_command(label="Help", command=info)
-        help_menu.add_command(label="Check for updates", command=info)
+        help_menu.add_command(label="Help", command=help)
+        help_menu.add_command(label="Check for updates", command=update)
         help_menu.add_separator()
-        help_menu.add_command(label="About", command=info)
+        help_menu.add_command(label="About", command=about)
         menubar.add_cascade(label="Help", menu=help_menu)
-
-        # the container is where we stack frames on top of each other. Wanted page will raise above the others.
-        container = tk.Frame(self, bg="#2A2A2A")
-        container.place(relwidth=1, relheight=1)
-        container.grid_rowconfigure(0, weight=1)
-        container.grid_columnconfigure(0, weight=1)
-
-        self.frames = {}
-        for F in (EntryPage, StartPage, PageIncome, PageExpenses):
-            page_name = F.__name__
-            frame = F(parent=container, controller=self)
-            self.frames[page_name] = frame
-
-            # put all of the pages in the same location on top of each other. Top one is visible.
-            frame.grid(row=0, column=0, sticky="nsew")
-
-        self.show_frame("StartPage")
 
     def show_frame(self, page_name):
         # Show a frame for the given page name
@@ -218,13 +265,14 @@ class PageIncome(tk.Frame):
                          bg="#2A2A2A", fg="#DED4D4")
         label.pack(side="top", fill="x", pady=10)
 
-        # Different windows
+        # Different frames
         button_window = tk.Frame(self, bg="#2A2A2A")
         sql_window = tk.Frame(self, bg="#2A2A2A")
         diagram_window = tk.Frame(self, bg="#2A2A2A")
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
         sql_window.place(relx=0.08, rely=0.25, relwidth=0.4, relheight=0.7, anchor="nw")
         diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
+
         # Buttons
         first_page_button = tk.Button(button_window, font=("arial", 13), text="<-Back to head page", bg="#1F1F1F",
                                       fg="#DED4D4", command=lambda: controller.show_frame("StartPage"))
@@ -238,6 +286,8 @@ class PageIncome(tk.Frame):
         EMcursor.execute("select * from incomes")
         records = EMcursor.fetchall()
         i = 1
+
+        # textbox appearance
         for row in records:
             text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]} note: {row[5]}\n'
             textbox.insert(END, text1)
@@ -248,6 +298,8 @@ class PageIncome(tk.Frame):
         # Diagram
         fig = matplotlib.figure.Figure(figsize=(4, 4))
         shape = fig.add_subplot(111)
+
+        # Making the categories appear on the chart
         EMcursor.execute("select * from categories")
         category_records = EMcursor.fetchall()
         categ = []
@@ -263,8 +315,14 @@ class PageIncome(tk.Frame):
             if category1 != 0:
                 categories += [category1]
                 categories_leg += [i]
-        shape.pie(categories, autopct="%1.1f%%", normalize=True)
-        shape.legend(categories_leg, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
+        # making the pie explode
+        explode = []
+        for el in categories:
+            explode.append(0.05)
+
+        # Drawing the pie
+        shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
+        shape.legend(categories_leg,  bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
                      ncol=2, mode="expand", borderaxespad=0.)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
         shape.add_artist(circle)
@@ -290,7 +348,8 @@ class PageExpenses(tk.Frame):
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
         sql_window.place(relx=0.08, rely=0.25, relwidth=0.4, relheight=0.7, anchor="nw")
         diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
-        # buttons
+
+        # Buttons
         first_page_button = tk.Button(button_window, font=("arial", 13), text="<- Back to head page", bg="#1F1F1F",
                                       fg="#DED4D4", command=lambda: controller.show_frame("StartPage"))
         expense_button = tk.Button(button_window, font=("arial", 13), text="Income page ->", bg="#1F1F1F", fg="#DED4D4",
@@ -303,7 +362,8 @@ class PageExpenses(tk.Frame):
         EMcursor.execute("select * from expenses")
         records = EMcursor.fetchall()
         i = 1
-        categ = ["Food", "Bills", "Shopping", "Clothing", "Travel", "Health", "Other"]
+
+        # textbox appearance
         for row in records:
             text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]} note: {row[5]}\n'
             textbox.insert(END, text1)
@@ -314,11 +374,13 @@ class PageExpenses(tk.Frame):
         # Diagram
         fig = matplotlib.figure.Figure(figsize=(4, 4))
         shape = fig.add_subplot(111)
+
+        # Making the categories appear on the chart
         EMcursor.execute("select * from categories")
         category_records = EMcursor.fetchall()
         categ = []
         for row in category_records:
-            categ += [row[0]]
+            categ += [row[1]]
         categories = []
         categories_leg = []
         for i in categ:
@@ -329,7 +391,14 @@ class PageExpenses(tk.Frame):
             if category1 != 0:
                 categories += [category1]
                 categories_leg += [i]
-        shape.pie(categories, autopct="%1.1f%%", normalize=True)
+
+        # explosion of pie chart
+        explode = []
+        for el in categories:
+            explode.append(0.05)
+
+        # Pie attributes
+        shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
         shape.legend(categories_leg, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
                      ncol=2, mode="expand", borderaxespad=0.)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
@@ -442,11 +511,9 @@ class EntryPage(tk.Frame):
             category2 = var_cat.get()
             note = description.get()
             if var2 == "1":
-                EMcursor.execute(
-                    f"INSERT INTO expenses VALUES ({caldate[0]}, {caldate[1]}, {caldate[2]}, {sma}, '{category2}', '{note}')")
+                EMcursor.execute(f"INSERT INTO expenses VALUES ({caldate[0]}, {caldate[1]}, {caldate[2]}, {sma}, '{category2}', '{note}')")
             elif var2 == "2":
-                EMcursor.execute(
-                    f"INSERT INTO incomes VALUES ({caldate[0]}, {caldate[1]}, {caldate[2]}, {sma}, '{category2}', '{note}')")
+                EMcursor.execute(f"INSERT INTO incomes VALUES ({caldate[0]}, {caldate[1]}, {caldate[2]}, {sma}, '{category2}', '{note}')")
             mydbtbl.commit()
             controller.show_frame("StartPage")
 
