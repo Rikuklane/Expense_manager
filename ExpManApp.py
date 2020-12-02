@@ -129,6 +129,12 @@ class ExpenseManager(tk.Tk):
         def info():
             messagebox.showwarning("Warning", "We are still working on this")
 
+        def about():
+            messagebox.showinfo("About", "This is an expense manager python application.\n\n"
+                                         "This project runs on SQL database.\n\n"
+                                         "This project is created as a school assignment.\n\n"
+                                         "Created by Triin Schaffrik and Richard Kuklane.")
+
         def leave():
             answer = messagebox.askyesno("Exit system", "Are you sure you want to quit?")
             if answer:
@@ -164,7 +170,7 @@ class ExpenseManager(tk.Tk):
         help_menu.add_command(label="Help", command=info)
         help_menu.add_command(label="Check for updates", command=info)
         help_menu.add_separator()
-        help_menu.add_command(label="About", command=info)
+        help_menu.add_command(label="About", command=about)
         menubar.add_cascade(label="Help", menu=help_menu)
 
         # the container is where we stack frames on top of each other. Wanted page will raise above the others.
