@@ -17,7 +17,7 @@ try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="password"
+        password="xIru4114B8GG9 ."
     )
     EMcursor = mydb.cursor()
     EMcursor.execute("CREATE DATABASE ExpManDatabase")
@@ -34,7 +34,7 @@ try:
     mydbtbl = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="password",
+        password="xIru4114B8GG9 .",
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
@@ -83,9 +83,9 @@ class ExpenseManager(tk.Tk):
             def add():
                 category = category_entry.get()
                 var2 = var.get()
-                if var2 == "1":
+                if var2 == "2":
                     EMcursor.execute(f"INSERT INTO categories (expense_categ) VALUES ('{category}')")
-                elif var2 == "2":
+                elif var2 == "1":
                     EMcursor.execute(f"INSERT INTO categories (income_categ) VALUES ('{category}')")
                 mydbtbl.commit()
                 window.destroy()
