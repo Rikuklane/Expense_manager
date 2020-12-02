@@ -38,10 +38,37 @@ try:
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
-    EMcursor.execute("CREATE TABLE expenses (year VARCHAR(5),month VARCHAR(2), day VARCHAR (2), aa VARCHAR(255), catg VARCHAR(255), descr VARCHAR(200))")
-    EMcursor.execute("CREATE TABLE incomes (year VARCHAR(5),month VARCHAR(2), day VARCHAR (2), aa VARCHAR(255), catg VARCHAR(255), descr VARCHAR(200))")
-    EMcursor.execute("CREATE TABLE categories (expense_categ VARCHAR(50), income_categ VARCHAR(50))")
-    EMcursor.execute("INSERT INTO categories VALUES ('Other', 'Other'), ('Salary', 'Food'), ('Family', 'Bill'), ('Work', 'Shopping'), ('Scholarchip', 'Transportation')")
+    try:
+        EMcursor.execute("CREATE TABLE expenses (year VARCHAR(5),month VARCHAR(2), day VARCHAR (2), aa VARCHAR(255), catg VARCHAR(255), descr VARCHAR(200))")
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with your username or password")
+        elif err.errno == errorcode.ER_DB_CREATE_EXISTS:
+            print("Database already exists")
+        else:
+            print(err)
+
+    try:
+        EMcursor.execute("CREATE TABLE incomes (year VARCHAR(5),month VARCHAR(2), day VARCHAR (2), aa VARCHAR(255), catg VARCHAR(255), descr VARCHAR(200))")
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with your username or password")
+        elif err.errno == errorcode.ER_DB_CREATE_EXISTS:
+            print("Database already exists")
+        else:
+            print(err)
+
+    try:
+        EMcursor.execute("CREATE TABLE categories (expense_categ VARCHAR(50), income_categ VARCHAR(50))")
+        EMcursor.execute("INSERT INTO categories VALUES ('Other', 'Other'), ('Salary', 'Food'), ('Family', 'Bill'), ('Work', 'Shopping'), ('Scholarchip', 'Transportation')")
+    except mysql.connector.Error as err:
+        if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
+            print("Something is wrong with your username or password")
+        elif err.errno == errorcode.ER_DB_CREATE_EXISTS:
+            print("Database already exists")
+        else:
+            print(err)
+
 except mysql.connector.Error as err:
     if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
         print("Something is wrong with your username or password")
@@ -51,6 +78,7 @@ except mysql.connector.Error as err:
         print(err)
 
 
+# The start of the app
 class ExpenseManager(tk.Tk):
 
     def __init__(self, *args, **kwargs):
@@ -215,13 +243,14 @@ class PageIncome(tk.Frame):
                          bg="#2A2A2A", fg="#DED4D4")
         label.pack(side="top", fill="x", pady=10)
 
-        # Different windows
+        # Different frames
         button_window = tk.Frame(self, bg="#2A2A2A")
         sql_window = tk.Frame(self, bg="#2A2A2A")
         diagram_window = tk.Frame(self, bg="#2A2A2A")
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
         sql_window.place(relx=0.08, rely=0.25, relwidth=0.4, relheight=0.7, anchor="nw")
         diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
+
         # Buttons
         first_page_button = tk.Button(button_window, font=("arial", 13), text="<-Back to head page", bg="#1F1F1F",
                                       fg="#DED4D4", command=lambda: controller.show_frame("StartPage"))
@@ -235,6 +264,8 @@ class PageIncome(tk.Frame):
         EMcursor.execute("select * from incomes")
         records = EMcursor.fetchall()
         i = 1
+
+        # textbox appearance
         for row in records:
             text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]} note: {row[5]}\n'
             textbox.insert(END, text1)
@@ -245,6 +276,8 @@ class PageIncome(tk.Frame):
         # Diagram
         fig = matplotlib.figure.Figure(figsize=(4, 4))
         shape = fig.add_subplot(111)
+
+        # Making the categories appear on the chart
         EMcursor.execute("select * from categories")
         category_records = EMcursor.fetchall()
         categ = []
@@ -260,10 +293,13 @@ class PageIncome(tk.Frame):
             if category1 != 0:
                 categories += [category1]
                 categories_leg += [i]
+
         # making the pie explode
         explode = []
         for el in categories:
             explode.append(0.05)
+
+        # Drawing the pie
         shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
         shape.legend(categories_leg,  bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
                      ncol=2, mode="expand", borderaxespad=0.)
@@ -291,7 +327,8 @@ class PageExpenses(tk.Frame):
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
         sql_window.place(relx=0.08, rely=0.25, relwidth=0.4, relheight=0.7, anchor="nw")
         diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
-        # buttons
+
+        # Buttons
         first_page_button = tk.Button(button_window, font=("arial", 13), text="<- Back to head page", bg="#1F1F1F",
                                       fg="#DED4D4", command=lambda: controller.show_frame("StartPage"))
         expense_button = tk.Button(button_window, font=("arial", 13), text="Income page ->", bg="#1F1F1F", fg="#DED4D4",
@@ -304,7 +341,8 @@ class PageExpenses(tk.Frame):
         EMcursor.execute("select * from expenses")
         records = EMcursor.fetchall()
         i = 1
-        categ = ["Food", "Bills", "Shopping", "Clothing", "Travel", "Health", "Other"]
+
+        # textbox appearance
         for row in records:
             text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]} note: {row[5]}\n'
             textbox.insert(END, text1)
@@ -315,6 +353,8 @@ class PageExpenses(tk.Frame):
         # Diagram
         fig = matplotlib.figure.Figure(figsize=(4, 4))
         shape = fig.add_subplot(111)
+
+        # Making the categories appear on the chart
         EMcursor.execute("select * from categories")
         category_records = EMcursor.fetchall()
         categ = []
@@ -330,12 +370,15 @@ class PageExpenses(tk.Frame):
             if category1 != 0:
                 categories += [category1]
                 categories_leg += [i]
+
         # explosion of pie chart
         explode = []
         for el in categories:
             explode.append(0.05)
+
+        # Pie attributes
         shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
-        shape.legend(categories_leg,  bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
+        shape.legend(categories_leg, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
                      ncol=2, mode="expand", borderaxespad=0.)
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
         shape.add_artist(circle)
