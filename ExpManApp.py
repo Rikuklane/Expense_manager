@@ -16,7 +16,7 @@ try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="xIru4114B8GG9 ."
+        password="password"
     )
     EMcursor = mydb.cursor()
     EMcursor.execute("CREATE DATABASE ExpManDatabase")
@@ -32,7 +32,7 @@ try:
     mydbtbl = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="xIru4114B8GG9 .",
+        password="password",
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
@@ -58,7 +58,9 @@ try:
 
     try:
         EMcursor.execute("CREATE TABLE categories (expense_categ VARCHAR(50), income_categ VARCHAR(50))")
-        EMcursor.execute("INSERT INTO categories VALUES ('Other', 'Other'), ('Salary', 'Food'), ('Family', 'Bill'), ('Work', 'Shopping'), ('Scholarchip', 'Transportation')")
+        EMcursor.execute("INSERT INTO categories VALUES ('Other', 'Other'), ('Salary', 'Food'), ('Support', 'Bills'),"
+                         "('Grants', 'Shopping'), ('Scholarchip', 'Transportation'), ('Investments', 'Entertainment'),"
+                         "('Sale', 'Gift'), ('Rental', 'Sport')")
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something is wrong with your username or password")
