@@ -11,6 +11,7 @@ from datetime import date
 import matplotlib.figure
 import matplotlib.patches
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+from sys import exit
 
 try:
     mydb = mysql.connector.connect(
@@ -104,7 +105,8 @@ class ExpenseManager(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame("StartPage")
-
+        
+        # Code for adding a category
         def Add_category():
             window = Toplevel(self, bg="#2A2A2A")
             window.geometry("300x200")
@@ -167,7 +169,7 @@ class ExpenseManager(tk.Tk):
         def leave():
             answer = messagebox.askyesno("Exit system", "Are you sure you want to quit?")
             if answer:
-                self.quit()
+                sys.exit()
 
         def entry():
             answer = messagebox.askyesno("Go to entry page", "Do you wish to make an entry?")
@@ -222,9 +224,7 @@ class StartPage(tk.Frame):
         label = tk.Label(self, text=d2[0], font=controller.title_font,
                          bg="#2A2A2A", fg="#DED4D4")
         label.pack(side="top", fill="x", pady=10)
-        # button window
-        button_window1 = tk.Frame(self, bg="#2A2A2A")
-        button_window1.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
+
         # taking info from database
         sumlist = []
         for m in ("incomes", "expenses"):
@@ -238,7 +238,11 @@ class StartPage(tk.Frame):
                         a += float(row[3])
             sumlist = sumlist + [a]
         sumlist = sumlist + [(sumlist[0] - sumlist[1])]
-
+        
+        # button window
+        button_window1 = tk.Frame(self, bg="#2A2A2A")
+        button_window1.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
+        
         # buttons on start page
         income_button = tk.Button(button_window1, font=("arial", 13), text="Incomes\n" + str(sumlist[0]), bg="#1F1F1F",
                                   fg="#DED4D4", command=lambda: controller.show_frame("PageIncome"))
@@ -317,6 +321,7 @@ class PageIncome(tk.Frame):
             if category1 != 0:
                 categories += [category1]
                 categories_leg += [i]
+        
         # making the pie explode
         explode = []
         for el in categories:
