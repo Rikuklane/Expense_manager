@@ -17,7 +17,7 @@ try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="password"
+        password="xIru4114B8GG9 ."
     )
     EMcursor = mydb.cursor()
     EMcursor.execute("CREATE DATABASE ExpManDatabase")
@@ -33,7 +33,7 @@ try:
     mydbtbl = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="password",
+        password="xIru4114B8GG9 .",
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
@@ -155,16 +155,22 @@ class ExpenseManager(tk.Tk):
             def incomes_categories():
                 EMcursor.execute("select * from categories")
                 records = EMcursor.fetchall()
+                categories = []
                 for row in records:
                     if row[0] != None:
                         categories.append(row[0])
+                categories.reverse()
+                category_box.config(values=categories)
 
             def expenses_categories():
                 EMcursor.execute("select * from categories")
                 records = EMcursor.fetchall()
+                categories = []
                 for row in records:
                     if row[1] != None:
                         categories.append(row[1])
+                categories.reverse()
+                category_box.config(values=categories)
 
             def remove():
                 category = category_box.get()
@@ -404,12 +410,11 @@ class PageIncome(tk.Frame):
                          ncol=2, mode="expand", borderaxespad=0., prop={"family": fontstyle})
             circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
             shape.add_artist(circle)
-            global canvas
-            canvas = FigureCanvasTkAgg(fig, diagram_window)
+            global canvasin
+            canvasin = FigureCanvasTkAgg(fig, diagram_window)
             fig.patch.set_facecolor("#2A2A2A")
-            canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
-            canvas.draw()
-            print('juhu')
+            canvasin.get_tk_widget().pack(side="left", fill="both", expand=True)
+            canvasin.draw()
 
         def box(date):
             textbox.configure(state='normal')
@@ -437,7 +442,7 @@ class PageIncome(tk.Frame):
             # Page title
             label.config(text=f'{months[(int(date[1])) - 1]} {(date[0])} incomes')
             # diagram
-            canvas.get_tk_widget().destroy()
+            canvasin.get_tk_widget().destroy()
             diagram(date)
 
         def next():
@@ -450,7 +455,7 @@ class PageIncome(tk.Frame):
             # Page title
             label.config(text=f'{months[(int(date[1])) - 1]} {(date[0])} incomes')
             # diagram
-            canvas.get_tk_widget().destroy()
+            canvasin.get_tk_widget().destroy()
             diagram(date)
 
         date = today
