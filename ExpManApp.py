@@ -361,7 +361,6 @@ class StartPage(tk.Frame):
         diagram.legend(prop={'family': fontstyle}, loc=5)
         ax.tick_params(axis='x', colors='#DED4D4')
         ax.tick_params(axis='y', colors="#DED4D4")
-        ax.set_xticklabels(names, fontname=fontstyle)
         ax.axes.grid()
         plt.show()
 
