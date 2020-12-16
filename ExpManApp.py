@@ -17,7 +17,7 @@ try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="xIru4114B8GG9 ."
+        password="password"
     )
     EMcursor = mydb.cursor()
     EMcursor.execute("CREATE DATABASE ExpManDatabase")
@@ -33,7 +33,7 @@ try:
     mydbtbl = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="xIru4114B8GG9 .",
+        password="password",
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
@@ -108,7 +108,8 @@ class ExpenseManager(tk.Tk):
             frame.grid(row=0, column=0, sticky="nsew")
 
         self.show_frame("StartPage")
-
+        
+        # Code for adding a category
         def Add_category():
             window = Toplevel(self, bg="#2A2A2A")
             window.geometry("300x200")
@@ -233,7 +234,7 @@ class ExpenseManager(tk.Tk):
         def leave():
             answer = messagebox.askyesno("Exit system", "Are you sure you want to quit?")
             if answer:
-                self.quit()
+                sys.exit()
 
         def entry():
             answer = messagebox.askyesno("Go to entry page", "Do you wish to make an entry?")
@@ -287,10 +288,6 @@ class StartPage(tk.Frame):
                          bg="#2A2A2A", fg="#DED4D4")
         label.pack(side="top", fill="x", pady=10)
 
-        # button window
-        button_window1 = tk.Frame(self, bg="#2A2A2A")
-        button_window1.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
-
         # diagram window
         diagram_window = tk.Frame(self, bg="#2A2A2A")
         diagram_window.place(relx=0.5, rely=0.23, relwidth=0.85, relheight=0.6, anchor="n")
@@ -305,8 +302,13 @@ class StartPage(tk.Frame):
                 if today[0] == row[0]:
                     if today[1] == row[1]:
                         a += float(row[3])
-            sumlist += [a]
-        sumlist += [(sumlist[0] - sumlist[1])]
+            sumlist = sumlist + [a]
+        sumlist = sumlist + [(sumlist[0] - sumlist[1])]
+        
+        # button window
+        button_window1 = tk.Frame(self, bg="#2A2A2A")
+        button_window1.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
+        
 
         # buttons on start page
         income_button = tk.Button(button_window1, font=(fontstyle, 13), text="Incomes\n" + str(sumlist[0]), bg="#1F1F1F",
