@@ -12,7 +12,6 @@ import matplotlib.figure
 import matplotlib.patches
 import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
-import numpy as np
 
 try:
     mydb = mysql.connector.connect(
@@ -181,7 +180,7 @@ class ExpenseManager(tk.Tk):
             category_window = tk.Frame(window, bg="#2A2A2A")
             button_window = tk.Frame(window, bg="#2A2A2A")
             radio_window.place(relx=0.5, rely=0.1, relwidth=0.7, relheight=0.15, anchor="n")
-            category_window.place(relx=0.5, rely= 0.25, relwidth=0.7, relheight=0.35, anchor="n")
+            category_window.place(relx=0.5, rely=0.25, relwidth=0.7, relheight=0.35, anchor="n")
             button_window.place(relx=0.5, rely=0.8, relwidth=0.7, relheight=0.15, anchor="n")
 
             categories = []
@@ -203,7 +202,7 @@ class ExpenseManager(tk.Tk):
             category_box = ttk.Combobox(category_window, values=categories, textvariable=n, width=30,
                                         font=(fontstyle, 11))
             remove_button = tk.Button(button_window, command=remove, text="Remove category", width=15, bg='#2A2A2A',
-                                   fg='#FFFFFF', font=(fontstyle, 13))
+                                      fg='#FFFFFF', font=(fontstyle, 13))
             radio1.pack(side="left", fill="both", expand=True)
             radio2.pack(side="right", fill="both", expand=True)
             label.pack(padx=10, pady=10, side="top", anchor="w")
@@ -211,7 +210,6 @@ class ExpenseManager(tk.Tk):
             category_box.pack(side="top", anchor="w")
 
         # popup messages on menu bar
-
         def info():
             messagebox.showwarning("Warning", "We are still working on this")
 
@@ -346,15 +344,16 @@ class StartPage(tk.Frame):
         names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
         diagram = plt.Figure(figsize=(12, max(bothcatvalues[0])), dpi=100)
         ax = diagram.add_subplot(111)
-        ax.plot(names, bothcatvalues[1], color='red', marker='o', label='Expense')
-        ax.plot(names, bothcatvalues[0], color='green', marker='o', label='Income')
+        ax.plot(names, bothcatvalues[1], color='#BD0707', marker='o', markersize=4, label='Expense', linewidth=2)
+        ax.plot(names, bothcatvalues[0], color='#09A853', marker='o', markersize=4, label='Income', linewidth=2)
         line1 = FigureCanvasTkAgg(diagram, diagram_window)
-        ax.set_title('2020', font=fontstyle, fontsize=13, color='#FFFFFF')
+        ax.set_title('2020', font=fontstyle, fontsize=13, color='#DED4D4')
         line1.get_tk_widget().pack(side='left', fill='both')
         diagram.set_facecolor('#2A2A2A')
-        diagram.legend(prop={'family':fontstyle}, loc=5)
-        ax.tick_params(axis='x', colors='#FFFFFF')
-        ax.tick_params(axis='y', colors='#FFFFFF')
+        ax.set_facecolor('#DED4D4')
+        diagram.legend(prop={'family': fontstyle}, loc=5)
+        ax.tick_params(axis='x', colors='#DED4D4')
+        ax.tick_params(axis='y', colors="#DED4D4")
         ax.axes.grid()
 
 
