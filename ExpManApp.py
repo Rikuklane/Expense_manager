@@ -10,8 +10,9 @@ from mysql.connector import errorcode
 from datetime import date
 import matplotlib.figure
 import matplotlib.patches
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import numpy as np
 
 try:
     mydb = mysql.connector.connect(
@@ -185,7 +186,7 @@ class ExpenseManager(tk.Tk):
 
             categories = []
 
-            #radiobuttons/label
+            # radiobuttons/label
             var = tk.StringVar()
             radio1 = tk.Radiobutton(radio_window, text="Expenses", variable=var, value="1", indicator=0, bg="#1F1F1F",
                                     fg="#DED4D4", font=(fontstyle, 13), command=expenses_categories)
@@ -193,7 +194,7 @@ class ExpenseManager(tk.Tk):
                                     fg="#DED4D4", font=(fontstyle, 13), command=incomes_categories)
             label = Label(category_window, text="Choose category:", bg="#2A2A2A", fg="#FFFFFF", font=(fontstyle, 13))
 
-            #combobox list
+            # combobox list
             window.option_add('*TCombobox*Listbox*Background', '#2A2A2A')
             window.option_add('*TCombobox*Listbox*Foreground', '#FFFFFF')
             window.option_add('*TCombobox*Listbox*fontfamily', fontstyle)
@@ -311,13 +312,13 @@ class StartPage(tk.Frame):
         
 
         # buttons on start page
-        income_button = tk.Button(button_window1, font=(fontstyle, 13), text="Incomes\n" + str(sumlist[0]), bg="#1F1F1F",
-                                  fg="#DED4D4", command=lambda: controller.show_frame("PageIncome"))
-        expense_button = tk.Button(button_window1, font=(fontstyle, 13), text="Expenses\n" + str(sumlist[1]),
+        income_button = tk.Button(button_window1, font=(fontstyle, 13), text="Incomes\n" + str(round(sumlist[0], 2)),
+                                  bg="#1F1F1F", fg="#DED4D4", command=lambda: controller.show_frame("PageIncome"))
+        expense_button = tk.Button(button_window1, font=(fontstyle, 13), text="Expenses\n" + str(round(sumlist[1], 2)),
                                    bg="#1F1F1F",
                                    fg="#DED4D4", command=lambda: controller.show_frame("PageExpenses"))
-        balance_button = tk.Button(button_window1, font=(fontstyle, 13), text="Balance\n" + str(sumlist[2]), bg="#1F1F1F",
-                                   fg="#DED4D4")
+        balance_button = tk.Button(button_window1, font=(fontstyle, 13), text="Balance\n" + str(round(sumlist[2], 2)),
+                                   bg="#1F1F1F", fg="#DED4D4")
         income_button.pack(side="left", fill="both", expand=True)
         expense_button.pack(side="left", fill="both", expand=True)
         balance_button.pack(side="left", fill="both", expand=True)
@@ -356,6 +357,7 @@ class StartPage(tk.Frame):
         ax.tick_params(axis='y', colors='#FFFFFF')
         ax.axes.grid()
 
+
 class PageIncome(tk.Frame):
 
     def __init__(self, parent, controller):
@@ -391,7 +393,7 @@ class PageIncome(tk.Frame):
         # textbox appearance
         for row in records:
             if today[0] == row[0] and today[1] == row[1]:
-                text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]}\nnote: {row[5]}\n'
+                text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {round(float(row[3]),2)}€ category: {row[4]}\nnote: {row[5]}\n'
                 textbox.insert(END, text1)
                 textbox.yview(END)
                 i += 1
@@ -415,7 +417,7 @@ class PageIncome(tk.Frame):
             for row in records:
                 if today[0] == row[0] and today[1] == row[1]:
                     if row[4] == str(i):
-                        category1 = category1 + int(row[3])
+                        category1 = category1 + round(float(row[3]), 2)
             if category1 != 0:
                 categories += [category1]
                 categories_leg += [i]
@@ -428,7 +430,7 @@ class PageIncome(tk.Frame):
         # Drawing the pie
         shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
         shape.legend(categories_leg, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
-                     ncol=2, mode="expand", borderaxespad=0., prop={"family":fontstyle})
+                     ncol=2, mode="expand", borderaxespad=0., prop={"family": fontstyle})
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
         shape.add_artist(circle)
         canvas = FigureCanvasTkAgg(fig, diagram_window)
@@ -491,7 +493,7 @@ class PageExpenses(tk.Frame):
         year = today[0]
         for row in records:
             if year == row[0] and month == row[1]:
-                text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]}\nnote: {row[5]}\n'
+                text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {round(float(row[3]),2)}€ category: {row[4]}\nnote: {row[5]}\n'
                 textbox.insert(END, text1)
                 textbox.yview(END)
                 i += 1
@@ -515,7 +517,7 @@ class PageExpenses(tk.Frame):
             for row in records:
                 if today[0] == row[0] and today[1] == row[1]:
                     if row[4] == str(i):
-                        category1 = category1 + int(row[3])
+                        category1 = category1 + round(float(row[3]), 2)
             if category1 != 0:
                 categories += [category1]
                 categories_leg += [i]
