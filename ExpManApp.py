@@ -17,7 +17,7 @@ try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="password"
+        password="xIru4114B8GG9 ."
     )
     EMcursor = mydb.cursor()
     EMcursor.execute("CREATE DATABASE ExpManDatabase")
@@ -33,7 +33,7 @@ try:
     mydbtbl = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="password",
+        password="xIru4114B8GG9 .",
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
@@ -81,6 +81,7 @@ d2 = ((date.today()).strftime("%B %d, %Y")).split()
 today = str(date.today()).split("-")
 fontstyle = "Comic Sans MS"
 
+
 # The start of the app
 class ExpenseManager(tk.Tk):
 
@@ -110,7 +111,7 @@ class ExpenseManager(tk.Tk):
         self.show_frame("StartPage")
         
         # Code for adding a category
-        def Add_category():
+        def add_category():
             window = Toplevel(self, bg="#2A2A2A")
             window.geometry("300x200")
 
@@ -147,7 +148,7 @@ class ExpenseManager(tk.Tk):
             category_entry.pack(side="top", anchor="w")
             add_button.pack(side='top', anchor='center')
 
-        def Remove_category():
+        def remove_category():
             window = Toplevel(self, bg="#2A2A2A")
             window.geometry("300x200")
 
@@ -175,17 +176,17 @@ class ExpenseManager(tk.Tk):
                 mydbtbl.commit()
                 window.destroy()
 
-            #windows
+            # windows
             radio_window = tk.Frame(window, bg="#2A2A2A")
             category_window = tk.Frame(window, bg="#2A2A2A")
             button_window = tk.Frame(window, bg="#2A2A2A")
             radio_window.place(relx=0.5, rely=0.1, relwidth=0.7, relheight=0.15, anchor="n")
-            category_window.place(relx=0.5, rely= 0.25, relwidth=0.7, relheight=0.35, anchor="n")
+            category_window.place(relx=0.5, rely=0.25, relwidth=0.7, relheight=0.35, anchor="n")
             button_window.place(relx=0.5, rely=0.8, relwidth=0.7, relheight=0.15, anchor="n")
 
             categories = []
 
-            #radiobuttons/label
+            # radiobuttons/label
             var = tk.StringVar()
             radio1 = tk.Radiobutton(radio_window, text="Expenses", variable=var, value="1", indicator=0, bg="#1F1F1F",
                                     fg="#DED4D4", font=(fontstyle, 13), command=expenses_categories)
@@ -193,7 +194,7 @@ class ExpenseManager(tk.Tk):
                                     fg="#DED4D4", font=(fontstyle, 13), command=incomes_categories)
             label = Label(category_window, text="Choose category:", bg="#2A2A2A", fg="#FFFFFF", font=(fontstyle, 13))
 
-            #combobox list
+            # combobox list
             window.option_add('*TCombobox*Listbox*Background', '#2A2A2A')
             window.option_add('*TCombobox*Listbox*Foreground', '#FFFFFF')
             window.option_add('*TCombobox*Listbox*fontfamily', fontstyle)
@@ -255,8 +256,8 @@ class ExpenseManager(tk.Tk):
         menubar.add_cascade(label="File", menu=file_menu)
 
         category_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
-        category_menu.add_command(label="Add category", command=Add_category)
-        category_menu.add_command(label="Remove category", command=Remove_category)
+        category_menu.add_command(label="Add category", command=add_category)
+        category_menu.add_command(label="Remove category", command=remove_category)
         menubar.add_cascade(label="Categories", menu=category_menu)
 
         tools_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
@@ -308,7 +309,6 @@ class StartPage(tk.Frame):
         # button window
         button_window1 = tk.Frame(self, bg="#2A2A2A")
         button_window1.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
-        
 
         # buttons on start page
         income_button = tk.Button(button_window1, font=(fontstyle, 13), text="Incomes\n" + str(sumlist[0]), bg="#1F1F1F",
@@ -348,20 +348,111 @@ class StartPage(tk.Frame):
         ax.plot(names, bothcatvalues[1], color='red', marker='o', label='Expense')
         ax.plot(names, bothcatvalues[0], color='green', marker='o', label='Income')
         line1 = FigureCanvasTkAgg(diagram, diagram_window)
-        ax.set_title('2020', font=fontstyle, fontsize=13, color='#FFFFFF')
+        ax.set_title(d2[2], font=fontstyle, fontsize=15, color='#FFFFFF')
         line1.get_tk_widget().pack(side='left', fill='both')
         diagram.set_facecolor('#2A2A2A')
-        diagram.legend(prop={'family':fontstyle}, loc=5)
+        diagram.legend(prop={'family': fontstyle}, loc=5)
         ax.tick_params(axis='x', colors='#FFFFFF')
         ax.tick_params(axis='y', colors='#FFFFFF')
+        ax.set_xticklabels(names, fontname=fontstyle)
         ax.axes.grid()
+        plt.show()
+
 
 class PageIncome(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent, bg="#2A2A2A")
         self.controller = controller
-        label = tk.Label(self, text=f"{d2[0]} incomes", font=controller.title_font,
+        months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October',
+                  'November', 'December']
+
+        def diagram(date):
+            # Making the categories appear on the chart
+            EMcursor.execute("select * from incomes")
+            records = EMcursor.fetchall()
+            categ = []
+            for row in records:
+                if row[4] not in categ and row[0] == date[0] and row[1] == date[1]:
+                    categ += [row[4]]
+            categories = []
+            categories_leg = []
+            for i in categ:
+                category1 = 0
+                for row in records:
+                    if date[0] == row[0] and date[1] == row[1]:
+                        if row[4] == str(i):
+                            category1 = category1 + int(row[3])
+                if category1 != 0:
+                    categories += [category1]
+                    categories_leg += [i]
+
+            # Diagram
+            fig = matplotlib.figure.Figure(figsize=(4, 4))
+            shape = fig.add_subplot(111)
+
+            # explosion of pie chart
+            explode = []
+            for el in categories:
+                explode.append(0.05)
+
+            # Pie attributes
+            shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
+            shape.legend(categories_leg, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
+                         ncol=2, mode="expand", borderaxespad=0., prop={"family": fontstyle})
+            circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
+            shape.add_artist(circle)
+            global canvas
+            canvas = FigureCanvasTkAgg(fig, diagram_window)
+            fig.patch.set_facecolor("#2A2A2A")
+            canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
+            canvas.draw()
+            print('juhu')
+
+        def box(date):
+            textbox.configure(state='normal')
+            textbox.delete('0.0', END)
+            EMcursor.execute("select * from incomes")
+            records = EMcursor.fetchall()
+            i = 1
+            for row in records:
+                if date[0] == row[0] and date[1] == row[1]:
+                    text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]}\nnote: {row[5]}\n'
+                    textbox.insert(END, text1)
+                    textbox.yview(END)
+                    i += 1
+            textbox.pack(side="left", fill="both", expand=True)
+            textbox.configure(state='disabled')
+
+        def last():
+            # textbox
+            if date[1] == '1':
+                date[1] = '12'
+                date[0] = str(int(date[0])-1)
+            else:
+                date[1] = str(int(date[1])-1)
+            box(date)
+            # Page title
+            label.config(text=f'{months[(int(date[1])) - 1]} {(date[0])} incomes')
+            # diagram
+            canvas.get_tk_widget().destroy()
+            diagram(date)
+
+        def next():
+            if date[1] == '12':
+                date[1] = '1'
+                date[0] = str(int(date[0])+1)
+            else:
+                date[1] = str(int(date[1])+1)
+            box(date)
+            # Page title
+            label.config(text=f'{months[(int(date[1])) - 1]} {(date[0])} incomes')
+            # diagram
+            canvas.get_tk_widget().destroy()
+            diagram(date)
+
+        date = today
+        label = tk.Label(self, text=f"{d2[0]} {d2[2]} incomes", font=controller.title_font,
                          bg="#2A2A2A", fg="#DED4D4")
         label.pack(side="top", fill="x", pady=10)
 
@@ -369,17 +460,25 @@ class PageIncome(tk.Frame):
         button_window = tk.Frame(self, bg="#2A2A2A")
         sql_window = tk.Frame(self, bg="#2A2A2A")
         diagram_window = tk.Frame(self, bg="#2A2A2A")
+        lastmonth_window = tk.Frame(self, bg="#2A2A2A")
+        nextmonth_window = tk.Frame(self, bg="#2A2A2A")
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
         sql_window.place(relx=0.08, rely=0.25, relwidth=0.4, relheight=0.7, anchor="nw")
         diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
+        lastmonth_window.place(relx=0, rely=0, relwidth=0.1, relheight=0.1, anchor='nw')
+        nextmonth_window.place(relx=1, rely=0, relwidth=0.1, relheight=0.1, anchor='ne')
 
         # Buttons
         first_page_button = tk.Button(button_window, font=(fontstyle, 13), text="<-Back to head page", bg="#1F1F1F",
                                       fg="#DED4D4", command=lambda: controller.show_frame("StartPage"))
         expense_button = tk.Button(button_window, font=(fontstyle, 13), text="Expenses page->", bg="#1F1F1F",
                                    fg="#DED4D4", command=lambda: controller.show_frame("PageExpenses"))
+        lastmonth_button = tk.Button(lastmonth_window, font=(fontstyle, 13), text='<-', bg='#1F1F1F', fg="#DED4D4", command=last)
+        nextmonth_button = tk.Button(nextmonth_window, font=(fontstyle, 13), text='->', bg='#1F1F1F', fg="#DED4D4", command=next)
         first_page_button.pack(side="left", fill="both", expand=1)
         expense_button.pack(side="left", fill="both", expand=1)
+        lastmonth_button.pack(side='left', fill='both', expand=True)
+        nextmonth_button.pack(side='left', fill='both', expand=True)
 
         # SQL
         textbox = ScrolledText(sql_window, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23, font=(fontstyle, 10)
@@ -397,44 +496,7 @@ class PageIncome(tk.Frame):
                 i += 1
         textbox.pack(side="left", fill="both", expand=True)
         textbox.configure(state='disabled')
-
-        # Diagram
-        fig = matplotlib.figure.Figure(figsize=(4, 4))
-        shape = fig.add_subplot(111)
-
-        # Making the categories appear on the chart
-        EMcursor.execute("select * from incomes")
-        category_records = EMcursor.fetchall()
-        categ = []
-        for row in category_records:
-            categ += [row[4]]
-        categories = []
-        categories_leg = []
-        for i in categ:
-            category1 = 0
-            for row in records:
-                if today[0] == row[0] and today[1] == row[1]:
-                    if row[4] == str(i):
-                        category1 = category1 + int(row[3])
-            if category1 != 0:
-                categories += [category1]
-                categories_leg += [i]
-
-        # making the pie explode
-        explode = []
-        for el in categories:
-            explode.append(0.05)
-
-        # Drawing the pie
-        shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
-        shape.legend(categories_leg, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
-                     ncol=2, mode="expand", borderaxespad=0., prop={"family":fontstyle})
-        circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
-        shape.add_artist(circle)
-        canvas = FigureCanvasTkAgg(fig, diagram_window)
-        fig.patch.set_facecolor("#2A2A2A")
-        canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
-        canvas.draw()
+        diagram(today)
 
 
 class PageExpenses(tk.Frame):
@@ -443,16 +505,92 @@ class PageExpenses(tk.Frame):
         tk.Frame.__init__(self, parent, bg="#2A2A2A")
         self.controller = controller
         months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
-        def last():
-            if today[1] == 1:
-                year = int(today[0])-1
-                month.config(12)
-                year.config(year)
-            else:
-                kk = months[months.index(months[int(month)-1])-1]
-                label.config(text=f'{kk} expenses')
 
-        label = tk.Label(self, text=f"{d2[0]} expenses", font=controller.title_font,
+        def diagram(date):
+            # Making the categories appear on the chart
+            EMcursor.execute("select * from expenses")
+            records = EMcursor.fetchall()
+            categ = []
+            for row in records:
+                if row[4] not in categ and row[0] == date[0] and row[1] == date[1]:
+                    categ += [row[4]]
+            categories = []
+            categories_leg = []
+            for i in categ:
+                category1 = 0
+                for row in records:
+                    if date[0] == row[0] and date[1] == row[1]:
+                        if row[4] == str(i):
+                            category1 = category1 + int(row[3])
+                if category1 != 0:
+                    categories += [category1]
+                    categories_leg += [i]
+
+            # Diagram
+            fig = matplotlib.figure.Figure(figsize=(4, 4))
+            shape = fig.add_subplot(111)
+
+            # explosion of pie chart
+            explode = []
+            for el in categories:
+                explode.append(0.05)
+
+            # Pie attributes
+            shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
+            shape.legend(categories_leg, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
+                         ncol=2, mode="expand", borderaxespad=0., prop={"family": fontstyle})
+            circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
+            shape.add_artist(circle)
+            global canvas
+            canvas = FigureCanvasTkAgg(fig, diagram_window)
+            fig.patch.set_facecolor("#2A2A2A")
+            canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
+            canvas.draw()
+
+        def box(date):
+            textbox.configure(state='normal')
+            textbox.delete('0.0', END)
+            EMcursor.execute("select * from expenses")
+            records = EMcursor.fetchall()
+            i = 1
+            for row in records:
+                if date[0] == row[0] and date[1] == row[1]:
+                    text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]}\nnote: {row[5]}\n'
+                    textbox.insert(END, text1)
+                    textbox.yview(END)
+                    i += 1
+            textbox.pack(side="left", fill="both", expand=True)
+            textbox.configure(state='disabled')
+
+        def last():
+            # textbox
+            if date[1] == '1':
+                date[1] = '12'
+                date[0] = str(int(date[0])-1)
+            else:
+                date[1] = str(int(date[1])-1)
+            box(date)
+            # Page title
+            label.config(text=f'{months[(int(date[1])) - 1]} {(date[0])} expenses')
+            # diagram
+            canvas.get_tk_widget().destroy()
+            diagram(date)
+
+        def next():
+            if date[1] == '12':
+                date[1] = '1'
+                date[0] = str(int(date[0])+1)
+            else:
+                date[1] = str(int(date[1])+1)
+            box(date)
+            # Page title
+            label.config(text=f'{months[(int(date[1])) - 1]} {(date[0])} expenses')
+            # diagram
+            canvas.get_tk_widget().destroy()
+            diagram(date)
+
+        date = today
+        label = tk.Label(self, text=f"{d2[0]} {d2[2]} expenses", font=controller.title_font,
                          bg="#2A2A2A", fg="#DED4D4")
         label.pack(side="top", fill="x", pady=10)
 
@@ -465,7 +603,7 @@ class PageExpenses(tk.Frame):
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
         sql_window.place(relx=0.08, rely=0.25, relwidth=0.4, relheight=0.7, anchor="nw")
         diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
-        lastmonth_window.place(relx=0, rely=0, relwidth= 0.1, relheight=0.1, anchor= 'nw')
+        lastmonth_window.place(relx=0, rely=0, relwidth=0.1, relheight=0.1, anchor='nw')
         nextmonth_window.place(relx=1, rely=0, relwidth=0.1, relheight=0.1, anchor='ne')
 
         # Buttons
@@ -473,7 +611,7 @@ class PageExpenses(tk.Frame):
                                       fg="#DED4D4", command=lambda: controller.show_frame("StartPage"))
         expense_button = tk.Button(button_window, font=(fontstyle, 13), text="Income page ->", bg="#1F1F1F", fg="#DED4D4",
                                    command=lambda: controller.show_frame("PageIncome"))
-        lastmonth_button = tk.Button(lastmonth_window, font=(fontstyle, 13), text = '<-', bg='#1F1F1F', fg="#DED4D4", command=last)
+        lastmonth_button = tk.Button(lastmonth_window, font=(fontstyle, 13), text='<-', bg='#1F1F1F', fg="#DED4D4", command=last)
         nextmonth_button = tk.Button(nextmonth_window, font=(fontstyle, 13), text='->', bg='#1F1F1F', fg="#DED4D4", command=next)
         first_page_button.pack(side="left", fill="both", expand=True)
         expense_button.pack(side="left", fill="both", expand=True)
@@ -481,16 +619,13 @@ class PageExpenses(tk.Frame):
         nextmonth_button.pack(side='left', fill='both', expand=True)
 
         # SQL
-        textbox = ScrolledText(sql_window, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23, font=(fontstyle, 10))
+        textbox = ScrolledText(sql_window, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23,
+                               font=(fontstyle, 10))
         EMcursor.execute("select * from expenses")
         records = EMcursor.fetchall()
         i = 1
-
-        # textbox appearance
-        month = today[1]
-        year = today[0]
         for row in records:
-            if year == row[0] and month == row[1]:
+            if date[0] == row[0] and date[1] == row[1]:
                 text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]}\nnote: {row[5]}\n'
                 textbox.insert(END, text1)
                 textbox.yview(END)
@@ -498,43 +633,7 @@ class PageExpenses(tk.Frame):
         textbox.pack(side="left", fill="both", expand=True)
         textbox.configure(state='disabled')
 
-        # Diagram
-        fig = matplotlib.figure.Figure(figsize=(4, 4))
-        shape = fig.add_subplot(111)
-
-        # Making the categories appear on the chart
-        EMcursor.execute("select * from expenses")
-        category_records = EMcursor.fetchall()
-        categ = []
-        for row in category_records:
-            categ += [row[4]]
-        categories = []
-        categories_leg = []
-        for i in categ:
-            category1 = 0
-            for row in records:
-                if today[0] == row[0] and today[1] == row[1]:
-                    if row[4] == str(i):
-                        category1 = category1 + int(row[3])
-            if category1 != 0:
-                categories += [category1]
-                categories_leg += [i]
-
-        # explosion of pie chart
-        explode = []
-        for el in categories:
-            explode.append(0.05)
-
-        # Pie attributes
-        shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
-        shape.legend(categories_leg, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
-                     ncol=2, mode="expand", borderaxespad=0., prop={"family":fontstyle})
-        circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
-        shape.add_artist(circle)
-        canvas = FigureCanvasTkAgg(fig, diagram_window)
-        fig.patch.set_facecolor("#2A2A2A")
-        canvas.get_tk_widget().pack(side="left", fill="both", expand=True)
-        canvas.draw()
+        diagram(date)
 
 
 class EntryPage(tk.Frame):
@@ -647,6 +746,7 @@ class EntryPage(tk.Frame):
 
         add_button = tk.Button(add_window, text='Add', command=intodb, bg="#1F1F1F", fg="#DED4D4")
         add_button.pack(side="top", fill="both", expand=True)
+
 
 if __name__ == "__main__":
     app = ExpenseManager()
