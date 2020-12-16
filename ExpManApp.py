@@ -17,7 +17,7 @@ try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="xIru4114B8GG9 ."
+        password="password"
     )
     EMcursor = mydb.cursor()
     EMcursor.execute("CREATE DATABASE ExpManDatabase")
@@ -33,7 +33,7 @@ try:
     mydbtbl = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="xIru4114B8GG9 .",
+        password="password",
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
