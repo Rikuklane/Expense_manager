@@ -11,6 +11,7 @@ from datetime import date
 import matplotlib.figure
 import matplotlib.patches
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import matplotlib.pyplot as plt
 
 try:
     mydb = mysql.connector.connect(
@@ -58,7 +59,9 @@ try:
 
     try:
         EMcursor.execute("CREATE TABLE categories (expense_categ VARCHAR(50), income_categ VARCHAR(50))")
-        EMcursor.execute("INSERT INTO categories VALUES ('Other', 'Other'), ('Salary', 'Food'), ('Family', 'Bill'), ('Work', 'Shopping'), ('Scholarchip', 'Transportation')")
+        EMcursor.execute("INSERT INTO categories VALUES ('Other', 'Other'), ('Salary', 'Food'), ('Support', 'Bills'),"
+                         "('Grants', 'Shopping'), ('Scholarchip', 'Transportation'), ('Investments', 'Entertainment'),"
+                         "('Sale', 'Gift'), ('Rental', 'Sport')")
     except mysql.connector.Error as err:
         if err.errno == errorcode.ER_ACCESS_DENIED_ERROR:
             print("Something is wrong with your username or password")
@@ -74,6 +77,9 @@ except mysql.connector.Error as err:
     else:
         print(err)
 
+d2 = ((date.today()).strftime("%B %d, %Y")).split()
+today = str(date.today()).split("-")
+fontstyle = "Comic Sans MS"
 
 # The start of the app
 class ExpenseManager(tk.Tk):
@@ -84,7 +90,7 @@ class ExpenseManager(tk.Tk):
 
         self.geometry("800x500")
         self.title("Expense Manager")
-        self.title_font = tkfont.Font(family="Arial", size=18, weight="bold", slant="italic")
+        self.title_font = tkfont.Font(family=fontstyle, size=18, weight="bold", slant="italic")
 
         # the container is where we stack frames on top of each other. Wanted page will raise above the others.
         container = tk.Frame(self, bg="#2A2A2A")
@@ -116,11 +122,11 @@ class ExpenseManager(tk.Tk):
 
             var = tk.StringVar()
             radio1 = tk.Radiobutton(radio_window, text="Expenses", variable=var, value="1", indicator=0, bg="#1F1F1F",
-                                    fg="#DED4D4", font=("Arial", 13))
+                                    fg="#DED4D4", font=(fontstyle, 13))
             radio2 = tk.Radiobutton(radio_window, text="Incomes", variable=var, value="2", indicator=0, bg="#1F1F1F",
-                                    fg="#DED4D4", font=("Arial", 13))
-            label = Label(add_window, text="Category name:", bg="#2A2A2A", fg="#FFFFFF", font=('Arial', 13))
-            category_entry = tk.Entry(add_window, width=20, bg='#FFFFFF', fg='#2A2A2A', font=('Arial', 13))
+                                    fg="#DED4D4", font=(fontstyle, 13))
+            label = Label(add_window, text="Category name:", bg="#2A2A2A", fg="#FFFFFF", font=(fontstyle, 13))
+            category_entry = tk.Entry(add_window, width=20, bg='#FFFFFF', fg='#2A2A2A', font=(fontstyle, 13))
 
             def add():
                 category = category_entry.get()
@@ -133,12 +139,74 @@ class ExpenseManager(tk.Tk):
                 window.destroy()
 
             add_button = tk.Button(button_window, command=add, text="Add category", width=10, bg='#2A2A2A',
-                                   fg='#FFFFFF', font=('Arial', 13))
+                                   fg='#FFFFFF', font=(fontstyle, 13))
             radio1.pack(side="left", fill="both", expand=True)
             radio2.pack(side="right", fill="both", expand=True)
             label.pack(padx=10, pady=10, side="top", anchor="w")
             category_entry.pack(side="top", anchor="w")
             add_button.pack(side='top', anchor='center')
+
+        def Remove_category():
+            window = Toplevel(self, bg="#2A2A2A")
+            window.geometry("300x200")
+
+            def incomes_categories():
+                EMcursor.execute("select * from categories")
+                records = EMcursor.fetchall()
+                for row in records:
+                    if row[0] != None:
+                        categories.append(row[0])
+
+            def expenses_categories():
+                EMcursor.execute("select * from categories")
+                records = EMcursor.fetchall()
+                for row in records:
+                    if row[1] != None:
+                        categories.append(row[1])
+
+            def remove():
+                category = category_box.get()
+                var2 = var.get()
+                if var2 == '1':
+                    EMcursor.execute(f"DELETE FROM categories WHERE expense_categ = '{category}'")
+                elif var2 == '2':
+                    EMcursor.execute(f"DELETE FROM categories WHERE income_categ = '{category}'")
+                mydbtbl.commit()
+                window.destroy()
+
+            #windows
+            radio_window = tk.Frame(window, bg="#2A2A2A")
+            category_window = tk.Frame(window, bg="#2A2A2A")
+            button_window = tk.Frame(window, bg="#2A2A2A")
+            radio_window.place(relx=0.5, rely=0.1, relwidth=0.7, relheight=0.15, anchor="n")
+            category_window.place(relx=0.5, rely= 0.25, relwidth=0.7, relheight=0.35, anchor="n")
+            button_window.place(relx=0.5, rely=0.8, relwidth=0.7, relheight=0.15, anchor="n")
+
+            categories = []
+
+            #radiobuttons/label
+            var = tk.StringVar()
+            radio1 = tk.Radiobutton(radio_window, text="Expenses", variable=var, value="1", indicator=0, bg="#1F1F1F",
+                                    fg="#DED4D4", font=(fontstyle, 13), command=expenses_categories)
+            radio2 = tk.Radiobutton(radio_window, text="Incomes", variable=var, value="2", indicator=0, bg="#1F1F1F",
+                                    fg="#DED4D4", font=(fontstyle, 13), command=incomes_categories)
+            label = Label(category_window, text="Choose category:", bg="#2A2A2A", fg="#FFFFFF", font=(fontstyle, 13))
+
+            #combobox list
+            window.option_add('*TCombobox*Listbox*Background', '#2A2A2A')
+            window.option_add('*TCombobox*Listbox*Foreground', '#FFFFFF')
+            window.option_add('*TCombobox*Listbox*fontfamily', fontstyle)
+
+            n = StringVar()
+            category_box = ttk.Combobox(category_window, values=categories, textvariable=n, width=30,
+                                        font=(fontstyle, 11))
+            remove_button = tk.Button(button_window, command=remove, text="Remove category", width=15, bg='#2A2A2A',
+                                   fg='#FFFFFF', font=(fontstyle, 13))
+            radio1.pack(side="left", fill="both", expand=True)
+            radio2.pack(side="right", fill="both", expand=True)
+            label.pack(padx=10, pady=10, side="top", anchor="w")
+            remove_button.pack(side='top', anchor='center')
+            category_box.pack(side="top", anchor="w")
 
         # popup messages on menu bar
 
@@ -179,26 +247,25 @@ class ExpenseManager(tk.Tk):
         menubar = tk.Menu(self)
         self.config(menu=menubar)
 
-        file_menu = tk.Menu(menubar, tearoff=0, font=("Arial", 11))
+        file_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
         file_menu.add_command(label="New entry", command=entry)
-        file_menu.add_command(label="Chart", command=info)
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=leave)
         menubar.add_cascade(label="File", menu=file_menu)
 
-        category_menu = tk.Menu(menubar, tearoff=0, font=("Arial", 11))
+        category_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
         category_menu.add_command(label="Add category", command=Add_category)
-        category_menu.add_command(label="Remove category", command=info)
+        category_menu.add_command(label="Remove category", command=Remove_category)
         menubar.add_cascade(label="Categories", menu=category_menu)
 
-        tools_menu = tk.Menu(menubar, tearoff=0, font=("Arial", 11))
+        tools_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
         tools_menu.add_radiobutton(label="Light mode", value=1, command=info)
         tools_menu.add_radiobutton(label="Dark mode", value=2, command=info)
         tools_menu.add_separator()
         tools_menu.add_command(label="Settings", command=info)
         menubar.add_cascade(label="Tools", menu=tools_menu)
 
-        help_menu = tk.Menu(menubar, tearoff=0, font=("Arial", 11))
+        help_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
         help_menu.add_command(label="Help", command=help)
         help_menu.add_command(label="Check for updates", command=update)
         help_menu.add_separator()
@@ -216,13 +283,18 @@ class StartPage(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent, bg="#2A2A2A")
         self.controller = controller
-        d2 = ((date.today()).strftime("%B %d, %Y")).split()
         label = tk.Label(self, text=d2[0], font=controller.title_font,
                          bg="#2A2A2A", fg="#DED4D4")
         label.pack(side="top", fill="x", pady=10)
+
         # button window
         button_window1 = tk.Frame(self, bg="#2A2A2A")
         button_window1.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
+
+        # diagram window
+        diagram_window = tk.Frame(self, bg="#2A2A2A")
+        diagram_window.place(relx=0.5, rely=0.23, relwidth=0.85, relheight=0.6, anchor="n")
+
         # taking info from database
         sumlist = []
         for m in ("incomes", "expenses"):
@@ -230,20 +302,19 @@ class StartPage(tk.Frame):
             records = EMcursor.fetchall()
             a = 0
             for row in records:
-                today = str(date.today()).split("-")
                 if today[0] == row[0]:
                     if today[1] == row[1]:
                         a += float(row[3])
-            sumlist = sumlist + [a]
-        sumlist = sumlist + [(sumlist[0] - sumlist[1])]
+            sumlist += [a]
+        sumlist += [(sumlist[0] - sumlist[1])]
 
         # buttons on start page
-        income_button = tk.Button(button_window1, font=("arial", 13), text="Incomes\n" + str(sumlist[0]), bg="#1F1F1F",
+        income_button = tk.Button(button_window1, font=(fontstyle, 13), text="Incomes\n" + str(sumlist[0]), bg="#1F1F1F",
                                   fg="#DED4D4", command=lambda: controller.show_frame("PageIncome"))
-        expense_button = tk.Button(button_window1, font=("arial", 13), text="Expenses\n" + str(sumlist[1]),
+        expense_button = tk.Button(button_window1, font=(fontstyle, 13), text="Expenses\n" + str(sumlist[1]),
                                    bg="#1F1F1F",
                                    fg="#DED4D4", command=lambda: controller.show_frame("PageExpenses"))
-        balance_button = tk.Button(button_window1, font=("arial", 13), text="Balance\n" + str(sumlist[2]), bg="#1F1F1F",
+        balance_button = tk.Button(button_window1, font=(fontstyle, 13), text="Balance\n" + str(sumlist[2]), bg="#1F1F1F",
                                    fg="#DED4D4")
         income_button.pack(side="left", fill="both", expand=True)
         expense_button.pack(side="left", fill="both", expand=True)
@@ -251,17 +322,44 @@ class StartPage(tk.Frame):
 
         button_window2 = tk.Frame(self, bg="#2A2A2A")
         button_window2.place(relx=0.9, rely=0.9, relwidth=0.2, relheight=0.1, anchor="n")
-        entry_button = tk.Button(button_window2, font=("arial", 13), text="Add an entry", bg="#1F1F1F",
+        entry_button = tk.Button(button_window2, font=(fontstyle, 13), text="Add an entry", bg="#1F1F1F",
                                  fg="#DED4D4", command=lambda: controller.show_frame("EntryPage"))
         entry_button.pack(side="left", fill="both", expand=True)
 
+        # taking info from database for diagram
+        bothcatvalues = []
+        for cat in ['incomes', 'expenses']:
+            values = []
+            for m in range(1, int(today[1])+1):
+                EMcursor.execute(f"select * from {cat}")
+                records = EMcursor.fetchall()
+                a = 0
+                for row in records:
+                    if today[0] == row[0]:
+                        if m == int(row[1]):
+                            a += float(row[3])
+                values += [a]
+            bothcatvalues += [values]
+        names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
+        diagram = plt.Figure(figsize=(12, max(bothcatvalues[0])), dpi=100)
+        ax = diagram.add_subplot(111)
+        ax.plot(names, bothcatvalues[1], color='red', marker='o', label='Expense')
+        ax.plot(names, bothcatvalues[0], color='green', marker='o', label='Income')
+        line1 = FigureCanvasTkAgg(diagram, diagram_window)
+        ax.set_title('2020', font=fontstyle, fontsize=13, color='#FFFFFF')
+        line1.get_tk_widget().pack(side='left', fill='both')
+        diagram.set_facecolor('#2A2A2A')
+        diagram.legend(prop={'family':fontstyle}, loc=5)
+        ax.tick_params(axis='x', colors='#FFFFFF')
+        ax.tick_params(axis='y', colors='#FFFFFF')
+        ax.axes.grid()
 
 class PageIncome(tk.Frame):
 
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent, bg="#2A2A2A")
         self.controller = controller
-        label = tk.Label(self, text="This is page about incomes", font=controller.title_font,
+        label = tk.Label(self, text=f"{d2[0]} incomes", font=controller.title_font,
                          bg="#2A2A2A", fg="#DED4D4")
         label.pack(side="top", fill="x", pady=10)
 
@@ -274,47 +372,52 @@ class PageIncome(tk.Frame):
         diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
 
         # Buttons
-        first_page_button = tk.Button(button_window, font=("arial", 13), text="<-Back to head page", bg="#1F1F1F",
+        first_page_button = tk.Button(button_window, font=(fontstyle, 13), text="<-Back to head page", bg="#1F1F1F",
                                       fg="#DED4D4", command=lambda: controller.show_frame("StartPage"))
-        expense_button = tk.Button(button_window, font=("arial", 13), text="Expenses page->", bg="#1F1F1F",
+        expense_button = tk.Button(button_window, font=(fontstyle, 13), text="Expenses page->", bg="#1F1F1F",
                                    fg="#DED4D4", command=lambda: controller.show_frame("PageExpenses"))
         first_page_button.pack(side="left", fill="both", expand=1)
         expense_button.pack(side="left", fill="both", expand=1)
 
         # SQL
-        textbox = ScrolledText(sql_window, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
+        textbox = ScrolledText(sql_window, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23, font=(fontstyle, 10)
+                               )
         EMcursor.execute("select * from incomes")
         records = EMcursor.fetchall()
         i = 1
 
         # textbox appearance
         for row in records:
-            text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]} note: {row[5]}\n'
-            textbox.insert(END, text1)
-            textbox.yview(END)
-            i += 1
+            if today[0] == row[0] and today[1] == row[1]:
+                text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]}\nnote: {row[5]}\n'
+                textbox.insert(END, text1)
+                textbox.yview(END)
+                i += 1
         textbox.pack(side="left", fill="both", expand=True)
+        textbox.configure(state='disabled')
 
         # Diagram
         fig = matplotlib.figure.Figure(figsize=(4, 4))
         shape = fig.add_subplot(111)
 
         # Making the categories appear on the chart
-        EMcursor.execute("select * from categories")
+        EMcursor.execute("select * from incomes")
         category_records = EMcursor.fetchall()
         categ = []
         for row in category_records:
-            categ += [row[0]]
+            categ += [row[4]]
         categories = []
         categories_leg = []
         for i in categ:
             category1 = 0
             for row in records:
-                if row[4] == str(i):
-                    category1 = category1 + int(row[3])
+                if today[0] == row[0] and today[1] == row[1]:
+                    if row[4] == str(i):
+                        category1 = category1 + int(row[3])
             if category1 != 0:
                 categories += [category1]
                 categories_leg += [i]
+
         # making the pie explode
         explode = []
         for el in categories:
@@ -322,8 +425,8 @@ class PageIncome(tk.Frame):
 
         # Drawing the pie
         shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
-        shape.legend(categories_leg,  bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
-                     ncol=2, mode="expand", borderaxespad=0.)
+        shape.legend(categories_leg, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
+                     ncol=2, mode="expand", borderaxespad=0., prop={"family":fontstyle})
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
         shape.add_artist(circle)
         canvas = FigureCanvasTkAgg(fig, diagram_window)
@@ -337,7 +440,17 @@ class PageExpenses(tk.Frame):
     def __init__(self, parent, controller):
         tk.Frame.__init__(self, parent, bg="#2A2A2A")
         self.controller = controller
-        label = tk.Label(self, text="This is page about expenses", font=controller.title_font,
+        months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+        def last():
+            if today[1] == 1:
+                year = int(today[0])-1
+                month.config(12)
+                year.config(year)
+            else:
+                kk = months[months.index(months[int(month)-1])-1]
+                label.config(text=f'{kk} expenses')
+
+        label = tk.Label(self, text=f"{d2[0]} expenses", font=controller.title_font,
                          bg="#2A2A2A", fg="#DED4D4")
         label.pack(side="top", fill="x", pady=10)
 
@@ -345,49 +458,62 @@ class PageExpenses(tk.Frame):
         button_window = tk.Frame(self, bg="#2A2A2A")
         sql_window = tk.Frame(self, bg="#2A2A2A")
         diagram_window = tk.Frame(self, bg="#2A2A2A")
+        lastmonth_window = tk.Frame(self, bg="#2A2A2A")
+        nextmonth_window = tk.Frame(self, bg="#2A2A2A")
         button_window.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
         sql_window.place(relx=0.08, rely=0.25, relwidth=0.4, relheight=0.7, anchor="nw")
         diagram_window.place(relx=0.53, rely=0.22, relwidth=0.4, relheight=0.62, anchor="nw")
+        lastmonth_window.place(relx=0, rely=0, relwidth= 0.1, relheight=0.1, anchor= 'nw')
+        nextmonth_window.place(relx=1, rely=0, relwidth=0.1, relheight=0.1, anchor='ne')
 
         # Buttons
-        first_page_button = tk.Button(button_window, font=("arial", 13), text="<- Back to head page", bg="#1F1F1F",
+        first_page_button = tk.Button(button_window, font=(fontstyle, 13), text="<- Back to head page", bg="#1F1F1F",
                                       fg="#DED4D4", command=lambda: controller.show_frame("StartPage"))
-        expense_button = tk.Button(button_window, font=("arial", 13), text="Income page ->", bg="#1F1F1F", fg="#DED4D4",
+        expense_button = tk.Button(button_window, font=(fontstyle, 13), text="Income page ->", bg="#1F1F1F", fg="#DED4D4",
                                    command=lambda: controller.show_frame("PageIncome"))
+        lastmonth_button = tk.Button(lastmonth_window, font=(fontstyle, 13), text = '<-', bg='#1F1F1F', fg="#DED4D4", command=last)
+        nextmonth_button = tk.Button(nextmonth_window, font=(fontstyle, 13), text='->', bg='#1F1F1F', fg="#DED4D4", command=next)
         first_page_button.pack(side="left", fill="both", expand=True)
         expense_button.pack(side="left", fill="both", expand=True)
+        lastmonth_button.pack(side='left', fill='both', expand=True)
+        nextmonth_button.pack(side='left', fill='both', expand=True)
 
         # SQL
-        textbox = ScrolledText(sql_window, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23)
+        textbox = ScrolledText(sql_window, wrap=WORD, bg="#2A2A2A", fg="#DED4D4", width=44, height=23, font=(fontstyle, 10))
         EMcursor.execute("select * from expenses")
         records = EMcursor.fetchall()
         i = 1
 
         # textbox appearance
+        month = today[1]
+        year = today[0]
         for row in records:
-            text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]} note: {row[5]}\n'
-            textbox.insert(END, text1)
-            textbox.yview(END)
-            i += 1
+            if year == row[0] and month == row[1]:
+                text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]}\nnote: {row[5]}\n'
+                textbox.insert(END, text1)
+                textbox.yview(END)
+                i += 1
         textbox.pack(side="left", fill="both", expand=True)
+        textbox.configure(state='disabled')
 
         # Diagram
         fig = matplotlib.figure.Figure(figsize=(4, 4))
         shape = fig.add_subplot(111)
 
         # Making the categories appear on the chart
-        EMcursor.execute("select * from categories")
+        EMcursor.execute("select * from expenses")
         category_records = EMcursor.fetchall()
         categ = []
         for row in category_records:
-            categ += [row[1]]
+            categ += [row[4]]
         categories = []
         categories_leg = []
         for i in categ:
             category1 = 0
             for row in records:
-                if row[4] == str(i):
-                    category1 = category1 + int(row[3])
+                if today[0] == row[0] and today[1] == row[1]:
+                    if row[4] == str(i):
+                        category1 = category1 + int(row[3])
             if category1 != 0:
                 categories += [category1]
                 categories_leg += [i]
@@ -400,7 +526,7 @@ class PageExpenses(tk.Frame):
         # Pie attributes
         shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
         shape.legend(categories_leg, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
-                     ncol=2, mode="expand", borderaxespad=0.)
+                     ncol=2, mode="expand", borderaxespad=0., prop={"family":fontstyle})
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
         shape.add_artist(circle)
         canvas = FigureCanvasTkAgg(fig, diagram_window)
@@ -451,7 +577,7 @@ class EntryPage(tk.Frame):
                 if category != None:
                     cat_button.menu.add_radiobutton(label=category, variable=var_cat, value=category,
                                                     background='#2A2A2A',
-                                                    foreground='#FFFFFF', font=('Arial', 12), )
+                                                    foreground='#FFFFFF', font=(fontstyle, 12), )
 
         def incomes_categories():
             for category in bothcategories:
@@ -467,7 +593,7 @@ class EntryPage(tk.Frame):
                 if category != None:
                     cat_button.menu.add_radiobutton(label=category, variable=var_cat, value=category,
                                                     background='#2A2A2A',
-                                                    foreground='#FFFFFF', font=('Arial', 12), )
+                                                    foreground='#FFFFFF', font=(fontstyle, 12))
 
         EMcursor.execute("select * from categories")
         records = EMcursor.fetchall()
@@ -476,23 +602,23 @@ class EntryPage(tk.Frame):
             bothcategories += [row[0]] + [row[1]]
         # different kinds of widgets
         radio1 = tk.Radiobutton(button_window, text="Expenses", variable=var, value="1", indicator=0, bg="#1F1F1F",
-                                fg="#DED4D4", font=("Arial", 13), command=expenses_categories)
+                                fg="#DED4D4", font=(fontstyle, 13), command=expenses_categories)
         radio2 = tk.Radiobutton(button_window, text="Incomes", variable=var, value="2", indicator=0, bg="#1F1F1F",
-                                fg="#DED4D4", font=("Arial", 13), command=incomes_categories)
+                                fg="#DED4D4", font=(fontstyle, 13), command=incomes_categories)
         cancel_button = tk.Button(cancel_window, text='<--', command=lambda: controller.show_frame("StartPage"),
                                   bg="#1F1F1F", fg="#DED4D4")
         cat_button = tk.Menubutton(category_window, text="Categories", bg="#1F1F1F", indicator=0,
-                                   fg="#DED4D4", font=("Arial", 13), relief="raised")
+                                   fg="#DED4D4", font=(fontstyle, 13), relief="raised")
         cat_button.menu = Menu(cat_button, tearoff=0, bg="#1F1F1F", fg="#DED4D4")
         cat_button["menu"] = cat_button.menu
         desc_label = tk.Label(description_window, text='             Enter Memo              ', bg='#2A2A2A',
-                              fg='#DED4D4', font=('Arial', 13))
-        description = tk.Entry(description_window, width=20, bg='#FFFFFF', fg='#2A2A2A', font=('Arial', 14))
-        cal_label = tk.Label(calendar_window, text='Choose date', bg='#2A2A2A', fg='#DED4D4', font=('Arial', 13))
+                              fg='#DED4D4', font=(fontstyle, 13))
+        description = tk.Entry(description_window, width=20, bg='#FFFFFF', fg='#2A2A2A', font=(fontstyle, 14))
+        cal_label = tk.Label(calendar_window, text='Choose date', bg='#2A2A2A', fg='#DED4D4', font=(fontstyle, 13))
         cal = DateEntry(calendar_window, width=12, bg="#1F1F1F", fg='#DED4D4', borderwidth=2)
         money_label = tk.Label(money_window, text='             Enter the amount      ', bg='#2A2A2A',
-                               fg='#DED4D4', font=('Arial', 13))
-        smma = tk.Entry(money_window, width=20, bg='#FFFFFF', fg='#2A2A2A', font=('Arial', 14))
+                               fg='#DED4D4', font=(fontstyle, 13))
+        smma = tk.Entry(money_window, width=20, bg='#FFFFFF', fg='#2A2A2A', font=(fontstyle, 14))
         radio1.pack(side="left", fill="both", expand=True)
         radio2.pack(side="right", fill="both", expand=True)
         cancel_button.pack(side="left", fill="both", expand=True)
@@ -519,7 +645,6 @@ class EntryPage(tk.Frame):
 
         add_button = tk.Button(add_window, text='Add', command=intodb, bg="#1F1F1F", fg="#DED4D4")
         add_button.pack(side="top", fill="both", expand=True)
-
 
 if __name__ == "__main__":
     app = ExpenseManager()
