@@ -247,25 +247,25 @@ class ExpenseManager(tk.Tk):
         menubar = tk.Menu(self)
         self.config(menu=menubar)
 
-        file_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
-        file_menu.add_command(label="New entry", command=entry)
+        file_menu = tk.Menu(menubar, tearoff=0, font=("italic", 11))
+        file_menu.add_command(label="New entry", command=entry, font=("italic", 11))
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=leave)
         menubar.add_cascade(label="File", menu=file_menu)
 
-        category_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
+        category_menu = tk.Menu(menubar, tearoff=0, font=("italic", 11))
         category_menu.add_command(label="Add category", command=Add_category)
         category_menu.add_command(label="Remove category", command=Remove_category)
         menubar.add_cascade(label="Categories", menu=category_menu)
 
-        tools_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
+        tools_menu = tk.Menu(menubar, tearoff=0, font=("italic", 11))
         tools_menu.add_radiobutton(label="Light mode", value=1, command=info)
         tools_menu.add_radiobutton(label="Dark mode", value=2, command=info)
         tools_menu.add_separator()
         tools_menu.add_command(label="Settings", command=info)
         menubar.add_cascade(label="Tools", menu=tools_menu)
 
-        help_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
+        help_menu = tk.Menu(menubar, tearoff=0, font=("italic", 11))
         help_menu.add_command(label="Help", command=help)
         help_menu.add_command(label="Check for updates", command=update)
         help_menu.add_separator()
@@ -529,7 +529,7 @@ class PageExpenses(tk.Frame):
         # Pie attributes
         shape.pie(categories, autopct="%1.1f%%", normalize=True, pctdistance=0.78, explode=explode)
         shape.legend(categories_leg, bbox_to_anchor=(0., 0.02, 1., .102), loc='upper center',
-                     ncol=2, mode="expand", borderaxespad=0., prop={"family":fontstyle})
+                     ncol=2, mode="expand", borderaxespad=0., prop={"family": fontstyle})
         circle = matplotlib.patches.Circle((0, 0), 0.4, color="#2A2A2A")
         shape.add_artist(circle)
         canvas = FigureCanvasTkAgg(fig, diagram_window)
@@ -579,8 +579,7 @@ class EntryPage(tk.Frame):
             for category in categories:
                 if category != None:
                     cat_button.menu.add_radiobutton(label=category, variable=var_cat, value=category,
-                                                    background='#2A2A2A',
-                                                    foreground='#FFFFFF', font=(fontstyle, 12), )
+                                                    background='#2A2A2A', foreground='#FFFFFF', font=(fontstyle, 12))
 
         def incomes_categories():
             for category in bothcategories:
@@ -595,8 +594,7 @@ class EntryPage(tk.Frame):
             for category in categories:
                 if category != None:
                     cat_button.menu.add_radiobutton(label=category, variable=var_cat, value=category,
-                                                    background='#2A2A2A',
-                                                    foreground='#FFFFFF', font=(fontstyle, 12))
+                                                    background='#2A2A2A', foreground='#FFFFFF', font=(fontstyle, 12))
 
         EMcursor.execute("select * from categories")
         records = EMcursor.fetchall()
@@ -634,17 +632,22 @@ class EntryPage(tk.Frame):
         smma.pack(side="left", fill="both", expand=True)
 
         def intodb():
-            var2 = var.get()
-            caldate = str(cal.get_date()).split("-")
-            sma = str(smma.get())
-            category2 = var_cat.get()
-            note = description.get()
-            if var2 == "1":
-                EMcursor.execute(f"INSERT INTO expenses VALUES ({caldate[0]}, {caldate[1]}, {caldate[2]}, {sma}, '{category2}', '{note}')")
-            elif var2 == "2":
-                EMcursor.execute(f"INSERT INTO incomes VALUES ({caldate[0]}, {caldate[1]}, {caldate[2]}, {sma}, '{category2}', '{note}')")
-            mydbtbl.commit()
-            controller.show_frame("StartPage")
+            try:
+                var2 = var.get()
+                caldate = str(cal.get_date()).split("-")
+                sma = str(smma.get())
+                category2 = var_cat.get()
+                note = description.get()
+                if category2 == "":
+                    raise ValueError("Category has not been chosen")
+                if var2 == "1":
+                    EMcursor.execute(f"INSERT INTO expenses VALUES ({caldate[0]}, {caldate[1]}, {caldate[2]}, {sma}, '{category2}', '{note}')")
+                elif var2 == "2":
+                    EMcursor.execute(f"INSERT INTO incomes VALUES ({caldate[0]}, {caldate[1]}, {caldate[2]}, {sma}, '{category2}', '{note}')")
+                mydbtbl.commit()
+                controller.show_frame("StartPage")
+            except:
+                messagebox.showwarning("Warning", "You should really enter a category and/or an amount!")
 
         add_button = tk.Button(add_window, text='Add', command=intodb, bg="#1F1F1F", fg="#DED4D4")
         add_button.pack(side="top", fill="both", expand=True)
