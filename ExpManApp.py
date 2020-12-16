@@ -10,14 +10,14 @@ from mysql.connector import errorcode
 from datetime import date
 import matplotlib.figure
 import matplotlib.patches
-from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 
 try:
     mydb = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="xIru4114B8GG9 ."
+        password="password"
     )
     EMcursor = mydb.cursor()
     EMcursor.execute("CREATE DATABASE ExpManDatabase")
@@ -33,7 +33,7 @@ try:
     mydbtbl = mysql.connector.connect(
         host="localhost",
         user="root",
-        password="xIru4114B8GG9 .",
+        password="password",
         database="ExpManDatabase"
     )
     EMcursor = mydbtbl.cursor()
@@ -203,7 +203,7 @@ class ExpenseManager(tk.Tk):
             category_box = ttk.Combobox(category_window, values=categories, textvariable=n, width=30,
                                         font=(fontstyle, 11))
             remove_button = tk.Button(button_window, command=remove, text="Remove category", width=15, bg='#2A2A2A',
-                                   fg='#FFFFFF', font=(fontstyle, 13))
+                                      fg='#FFFFFF', font=(fontstyle, 13))
             radio1.pack(side="left", fill="both", expand=True)
             radio2.pack(side="right", fill="both", expand=True)
             label.pack(padx=10, pady=10, side="top", anchor="w")
@@ -211,7 +211,6 @@ class ExpenseManager(tk.Tk):
             category_box.pack(side="top", anchor="w")
 
         # popup messages on menu bar
-
         def info():
             messagebox.showwarning("Warning", "We are still working on this")
 
@@ -249,8 +248,8 @@ class ExpenseManager(tk.Tk):
         menubar = tk.Menu(self)
         self.config(menu=menubar)
 
-        file_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
-        file_menu.add_command(label="New entry", command=entry)
+        file_menu = tk.Menu(menubar, tearoff=0, font=("italic", 11))
+        file_menu.add_command(label="New entry", command=entry, font=("italic", 11))
         file_menu.add_separator()
         file_menu.add_command(label="Exit", command=leave)
         menubar.add_cascade(label="File", menu=file_menu)
@@ -260,14 +259,14 @@ class ExpenseManager(tk.Tk):
         category_menu.add_command(label="Remove category", command=remove_category)
         menubar.add_cascade(label="Categories", menu=category_menu)
 
-        tools_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
+        tools_menu = tk.Menu(menubar, tearoff=0, font=("italic", 11))
         tools_menu.add_radiobutton(label="Light mode", value=1, command=info)
         tools_menu.add_radiobutton(label="Dark mode", value=2, command=info)
         tools_menu.add_separator()
         tools_menu.add_command(label="Settings", command=info)
         menubar.add_cascade(label="Tools", menu=tools_menu)
 
-        help_menu = tk.Menu(menubar, tearoff=0, font=(fontstyle, 11))
+        help_menu = tk.Menu(menubar, tearoff=0, font=("italic", 11))
         help_menu.add_command(label="Help", command=help)
         help_menu.add_command(label="Check for updates", command=update)
         help_menu.add_separator()
@@ -311,13 +310,13 @@ class StartPage(tk.Frame):
         button_window1.place(relx=0.5, rely=0.1, relwidth=0.9, relheight=0.1, anchor="n")
 
         # buttons on start page
-        income_button = tk.Button(button_window1, font=(fontstyle, 13), text="Incomes\n" + str(sumlist[0]), bg="#1F1F1F",
-                                  fg="#DED4D4", command=lambda: controller.show_frame("PageIncome"))
-        expense_button = tk.Button(button_window1, font=(fontstyle, 13), text="Expenses\n" + str(sumlist[1]),
+        income_button = tk.Button(button_window1, font=(fontstyle, 13), text="Incomes\n" + str(round(sumlist[0], 2)),
+                                  bg="#1F1F1F", fg="#DED4D4", command=lambda: controller.show_frame("PageIncome"))
+        expense_button = tk.Button(button_window1, font=(fontstyle, 13), text="Expenses\n" + str(round(sumlist[1], 2)),
                                    bg="#1F1F1F",
                                    fg="#DED4D4", command=lambda: controller.show_frame("PageExpenses"))
-        balance_button = tk.Button(button_window1, font=(fontstyle, 13), text="Balance\n" + str(sumlist[2]), bg="#1F1F1F",
-                                   fg="#DED4D4")
+        balance_button = tk.Button(button_window1, font=(fontstyle, 13), text="Balance\n" + str(round(sumlist[2], 2)),
+                                   bg="#1F1F1F", fg="#DED4D4")
         income_button.pack(side="left", fill="both", expand=True)
         expense_button.pack(side="left", fill="both", expand=True)
         balance_button.pack(side="left", fill="both", expand=True)
@@ -342,21 +341,24 @@ class StartPage(tk.Frame):
                             a += float(row[3])
                 values += [a]
             bothcatvalues += [values]
+
         names = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC']
         diagram = plt.Figure(figsize=(12, max(bothcatvalues[0])), dpi=100)
         ax = diagram.add_subplot(111)
-        ax.plot(names, bothcatvalues[1], color='red', marker='o', label='Expense')
-        ax.plot(names, bothcatvalues[0], color='green', marker='o', label='Income')
+        ax.plot(names, bothcatvalues[1], color='#BD0707', marker='o', markersize=4, label='Expense', linewidth=2)
+        ax.plot(names, bothcatvalues[0], color='#09A853', marker='o', markersize=4, label='Income', linewidth=2)
         line1 = FigureCanvasTkAgg(diagram, diagram_window)
-        ax.set_title(d2[2], font=fontstyle, fontsize=15, color='#FFFFFF')
+        ax.set_title(d2[2], font=fontstyle, fontsize=15, color='#DED4D4')
         line1.get_tk_widget().pack(side='left', fill='both')
         diagram.set_facecolor('#2A2A2A')
+        ax.set_facecolor('#DED4D4')
         diagram.legend(prop={'family': fontstyle}, loc=5)
-        ax.tick_params(axis='x', colors='#FFFFFF')
-        ax.tick_params(axis='y', colors='#FFFFFF')
+        ax.tick_params(axis='x', colors='#DED4D4')
+        ax.tick_params(axis='y', colors="#DED4D4")
         ax.set_xticklabels(names, fontname=fontstyle)
         ax.axes.grid()
         plt.show()
+
 
 
 class PageIncome(tk.Frame):
@@ -490,12 +492,13 @@ class PageIncome(tk.Frame):
         # textbox appearance
         for row in records:
             if today[0] == row[0] and today[1] == row[1]:
-                text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]}\nnote: {row[5]}\n'
+                text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {round(float(row[3]),2)}€ category: {row[4]}\nnote: {row[5]}\n'
                 textbox.insert(END, text1)
                 textbox.yview(END)
                 i += 1
         textbox.pack(side="left", fill="both", expand=True)
         textbox.configure(state='disabled')
+
         diagram(today)
 
 
@@ -626,7 +629,7 @@ class PageExpenses(tk.Frame):
         i = 1
         for row in records:
             if date[0] == row[0] and date[1] == row[1]:
-                text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {row[3]}€ category: {row[4]}\nnote: {row[5]}\n'
+                text1 = f'{i}) {row[2]}.{row[1]}.{row[0]} - {round(float(row[3]),2)}€ category: {row[4]}\nnote: {row[5]}\n'
                 textbox.insert(END, text1)
                 textbox.yview(END)
                 i += 1
@@ -677,8 +680,7 @@ class EntryPage(tk.Frame):
             for category in categories:
                 if category != None:
                     cat_button.menu.add_radiobutton(label=category, variable=var_cat, value=category,
-                                                    background='#2A2A2A',
-                                                    foreground='#FFFFFF', font=(fontstyle, 12), )
+                                                    background='#2A2A2A', foreground='#FFFFFF', font=(fontstyle, 12))
 
         def incomes_categories():
             for category in bothcategories:
@@ -693,8 +695,7 @@ class EntryPage(tk.Frame):
             for category in categories:
                 if category != None:
                     cat_button.menu.add_radiobutton(label=category, variable=var_cat, value=category,
-                                                    background='#2A2A2A',
-                                                    foreground='#FFFFFF', font=(fontstyle, 12))
+                                                    background='#2A2A2A', foreground='#FFFFFF', font=(fontstyle, 12))
 
         EMcursor.execute("select * from categories")
         records = EMcursor.fetchall()
@@ -732,17 +733,22 @@ class EntryPage(tk.Frame):
         smma.pack(side="left", fill="both", expand=True)
 
         def intodb():
-            var2 = var.get()
-            caldate = str(cal.get_date()).split("-")
-            sma = str(smma.get())
-            category2 = var_cat.get()
-            note = description.get()
-            if var2 == "1":
-                EMcursor.execute(f"INSERT INTO expenses VALUES ({caldate[0]}, {caldate[1]}, {caldate[2]}, {sma}, '{category2}', '{note}')")
-            elif var2 == "2":
-                EMcursor.execute(f"INSERT INTO incomes VALUES ({caldate[0]}, {caldate[1]}, {caldate[2]}, {sma}, '{category2}', '{note}')")
-            mydbtbl.commit()
-            controller.show_frame("StartPage")
+            try:
+                var2 = var.get()
+                caldate = str(cal.get_date()).split("-")
+                sma = str(smma.get())
+                category2 = var_cat.get()
+                note = description.get()
+                if category2 == "":
+                    raise ValueError("Category has not been chosen")
+                if var2 == "1":
+                    EMcursor.execute(f"INSERT INTO expenses VALUES ({caldate[0]}, {caldate[1]}, {caldate[2]}, {sma}, '{category2}', '{note}')")
+                elif var2 == "2":
+                    EMcursor.execute(f"INSERT INTO incomes VALUES ({caldate[0]}, {caldate[1]}, {caldate[2]}, {sma}, '{category2}', '{note}')")
+                mydbtbl.commit()
+                controller.show_frame("StartPage")
+            except:
+                messagebox.showwarning("Warning", "You should really enter a category and/or an amount!")
 
         add_button = tk.Button(add_window, text='Add', command=intodb, bg="#1F1F1F", fg="#DED4D4")
         add_button.pack(side="top", fill="both", expand=True)
