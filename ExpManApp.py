@@ -384,7 +384,7 @@ class PageIncome(tk.Frame):
                 for row in records:
                     if date[0] == row[0] and date[1] == row[1]:
                         if row[4] == str(i):
-                            category1 = category1 + int(row[3])
+                            category1 = category1 + round(float(row[3]), 2)
                 if category1 != 0:
                     categories += [category1]
                     categories_leg += [i]
@@ -499,7 +499,7 @@ class PageIncome(tk.Frame):
         textbox.pack(side="left", fill="both", expand=True)
         textbox.configure(state='disabled')
 
-        diagram(today)
+        diagram(date)
 
 
 class PageExpenses(tk.Frame):
@@ -524,7 +524,7 @@ class PageExpenses(tk.Frame):
                 for row in records:
                     if date[0] == row[0] and date[1] == row[1]:
                         if row[4] == str(i):
-                            category1 = category1 + int(row[3])
+                            category1 = category1 + round(float(row[3]), 2)
                 if category1 != 0:
                     categories += [category1]
                     categories_leg += [i]
